@@ -1,0 +1,78 @@
+/* ==================================================
+   CTA COMPONENT STYLES
+   ================================================== */
+
+.cta-section {
+  padding-top: 48px;
+  padding-bottom: 72px;
+}
+
+.cta-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 48px 48px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    135deg,
+    var(--accent-subtle) 0%,
+    rgba(99, 102, 241, 0.04) 100%
+  );
+  border: 1px solid var(--accent-subtle-border);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.cta-box:hover {
+  border-color: var(--accent-primary);
+}
+
+.cta-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 680px;
+}
+
+.cta-heading {
+  font-size: clamp(24px, 2.8vw, 32px);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.cta-description {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.cta-action {
+  flex-shrink: 0;
+}
+
+.cta-btn {
+  padding: 13px 26px;
+  font-size: 1rem;
+}
+
+@media (max-width: 860px) {
+  .cta-box {
+    flex-direction: column;
+    text-align: center;
+    padding: 36px 24px;
+  }
+
+  .cta-content {
+    align-items: center;
+  }
+
+  .cta-action {
+    width: 100%;
+  }
+
+  .cta-btn {
+    width: 100%;
+  }
+}

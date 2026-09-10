@@ -1,0 +1,243 @@
+/* ==================================================
+   HERO WORKFLOW VISUAL STYLES
+   ================================================== */
+
+.hero-workflow-wrapper {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.hero-workflow-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  transition: border-color var(--transition-fast), background-color var(--transition-base);
+}
+
+/* 1. Idea Node */
+.hw-idea-node {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.hw-idea-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.hw-user-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--accent-subtle);
+  color: var(--accent-primary);
+}
+
+/* Connectors */
+.hw-connector-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 4px 0;
+  position: relative;
+}
+
+.hw-arrow-down {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--workflow-line);
+  margin-top: -1px;
+}
+
+/* 2. AI Orchestrator Node */
+.hw-orchestrator-node {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.hw-orchestrator-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: var(--radius-full);
+  background: var(--accent-primary);
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.hw-orchestrator-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+.hw-sparkle-icon {
+  color: #ffffff;
+}
+
+/* Branching SVG Lines */
+.hw-branching-svg-wrap {
+  width: 100%;
+  height: 36px;
+  position: relative;
+}
+
+.hw-branch-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Agents Grid */
+.hw-agents-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.hw-agent-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 6px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  transition: all var(--transition-fast);
+  cursor: default;
+}
+
+.hw-agent-card:hover,
+.hw-agent-card.hovered {
+  border-color: var(--border-hover);
+  background-color: var(--bg-card);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.hw-agent-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  transition: transform var(--transition-fast);
+}
+
+.hw-agent-card:hover .hw-agent-icon-box {
+  transform: scale(1.05);
+}
+
+.hw-agent-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Merge SVG to Bottom Agents */
+.hw-merge-svg-wrap {
+  width: 100%;
+  height: 32px;
+  position: relative;
+}
+
+.hw-merge-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Bottom Agents */
+.hw-bottom-agents {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.hw-bottom-agents .hw-agent-card {
+  width: 120px;
+}
+
+.hw-bottom-connector {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.hw-bottom-line {
+  flex: 1;
+  height: 1.5px;
+  background-color: var(--workflow-line);
+}
+
+.hw-arrow-r {
+  flex-shrink: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .hero-workflow-card {
+    padding: 24px 16px;
+  }
+
+  .hw-agents-grid {
+    gap: 8px;
+  }
+
+  .hw-agent-card {
+    padding: 10px 4px;
+  }
+
+  .hw-agent-icon-box {
+    width: 32px;
+    height: 32px;
+  }
+
+  .hw-agent-name {
+    font-size: 0.7rem;
+  }
+
+  .hw-bottom-agents {
+    gap: 12px;
+  }
+
+  .hw-bottom-agents .hw-agent-card {
+    width: 100px;
+  }
+}

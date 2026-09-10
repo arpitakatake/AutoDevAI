@@ -1,0 +1,75 @@
+/* ==================================================
+   WHY CHOOSE AUTODEVAI COMPONENT STYLES
+   ================================================== */
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  max-width: 1060px;
+  margin: 0 auto;
+}
+
+.why-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 28px 24px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+}
+
+.why-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.why-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background-color: var(--accent-subtle);
+  border: 1px solid var(--accent-subtle-border);
+  color: var(--accent-primary);
+  margin-bottom: 16px;
+  transition: transform var(--transition-fast);
+}
+
+.why-card:hover .why-icon-box {
+  transform: scale(1.05);
+}
+
+.why-icon {
+  color: var(--accent-primary);
+}
+
+.why-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.why-card-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.why-card-desc {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 640px) {
+  .why-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}

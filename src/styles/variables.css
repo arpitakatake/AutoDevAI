@@ -1,0 +1,114 @@
+:root {
+  /* ==================================================
+     LIGHT THEME (Default)
+     ================================================== */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8FAFC;
+  --bg-tertiary: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --bg-input: #FFFFFF;
+
+  --text-primary: #172554;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+
+  --border-color: #E2E8F0;
+  --border-subtle: #F1F5F9;
+  --border-hover: #CBD5E1;
+
+  --accent-primary: #4F46E5;
+  --accent-secondary: #6366F1;
+  --accent-text: #FFFFFF;
+  --accent-subtle: rgba(79, 70, 229, 0.08);
+  --accent-subtle-border: rgba(79, 70, 229, 0.2);
+
+  --success: #10B981;
+  --success-subtle: rgba(16, 185, 129, 0.1);
+
+  --warning: #F59E0B;
+  --warning-subtle: rgba(245, 158, 11, 0.1);
+  --error: #EF4444;
+  --error-subtle: rgba(239, 68, 68, 0.1);
+  --info: #3B82F6;
+  --info-subtle: rgba(59, 130, 246, 0.1);
+
+  --status-pending: #94A3B8;
+  --status-in-progress: #6366F1;
+  --status-active: #10B981;
+  --status-disabled: #CBD5E1;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 16px -2px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 10px 30px -4px rgba(15, 23, 42, 0.08);
+
+  --workflow-line: #CBD5E1;
+  --workflow-line-active: #818CF8;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Sizing & Spacing */
+  --max-width: 1240px;
+  --navbar-height: 64px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+}
+
+[data-theme="dark"] {
+  /* ==================================================
+     DARK THEME
+     ================================================== */
+  --bg-primary: #07111F;
+  --bg-secondary: #0B1728;
+  --bg-tertiary: #112239;
+  --bg-card: #0B1728;
+  --bg-card-hover: #0F1E33;
+  --bg-input: #0B1728;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+
+  --border-color: #1E3A5F;
+  --border-subtle: #142842;
+  --border-hover: #294D7B;
+
+  --accent-primary: #6366F1;
+  --accent-secondary: #3B82F6;
+  --accent-text: #FFFFFF;
+  --accent-subtle: rgba(99, 102, 241, 0.12);
+  --accent-subtle-border: rgba(99, 102, 241, 0.28);
+
+  --success: #10B981;
+  --success-subtle: rgba(16, 185, 129, 0.12);
+
+  --warning: #F59E0B;
+  --warning-subtle: rgba(245, 158, 11, 0.15);
+  --error: #EF4444;
+  --error-subtle: rgba(239, 68, 68, 0.15);
+  --info: #3B82F6;
+  --info-subtle: rgba(59, 130, 246, 0.15);
+
+  --status-pending: #64748B;
+  --status-in-progress: #818CF8;
+  --status-active: #10B981;
+  --status-disabled: #334155;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 30px -4px rgba(0, 0, 0, 0.5);
+
+  --workflow-line: #1E3A5F;
+  --workflow-line-active: #6366F1;
+}

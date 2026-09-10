@@ -1,0 +1,128 @@
+/* ==================================================
+   WORKFLOW SECTION STYLES
+   ================================================== */
+
+/* Desktop Track */
+.workflow-desktop-track {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 0;
+}
+
+.workflow-stage-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 80px;
+  cursor: default;
+  transition: transform var(--transition-fast);
+}
+
+.workflow-stage-node:hover {
+  transform: translateY(-2px);
+}
+
+.workflow-icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.workflow-stage-node:hover .workflow-icon-circle {
+  box-shadow: var(--shadow-md);
+  transform: scale(1.06);
+}
+
+.workflow-stage-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* Horizontal Connector */
+.workflow-connector-horizontal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  max-width: 60px;
+  min-width: 20px;
+  margin: 0 6px;
+  color: var(--workflow-line);
+}
+
+.workflow-line-h {
+  flex: 1;
+  height: 1.5px;
+  background-color: var(--workflow-line);
+}
+
+.workflow-arrow-h {
+  color: var(--workflow-line);
+  margin-left: -2px;
+}
+
+/* Mobile Vertical Track */
+.workflow-mobile-track {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  padding: 8px 0;
+}
+
+.workflow-mobile-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+}
+
+.workflow-mobile-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.workflow-icon-circle.mobile {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.workflow-mobile-line-v {
+  width: 1.5px;
+  height: 42px;
+  background-color: var(--workflow-line);
+  margin: 4px 0;
+}
+
+.workflow-mobile-content {
+  display: flex;
+  flex-direction: column;
+  padding-top: 6px;
+}
+
+.workflow-mobile-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.workflow-mobile-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
