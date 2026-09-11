@@ -1,18 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  PlusCircle,
-  ArrowRight,
-  Clock,
-  Sparkles,
-  Layers,
-  CheckCircle2,
-  AlertCircle,
-  FolderKanban,
-  Activity,
-  ShieldCheck,
-  ChevronRight,
-} from 'lucide-react';
+import { Plus, ArrowRight, Clock, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useProject } from '../context/ProjectContext.jsx';
 import { MOCK_AGENT_ACTIVITY } from '../data/mockAgentActivity.js';
@@ -22,15 +10,8 @@ export default function DashboardPage() {
   const { projects, setActiveProjectId } = useProject();
   const navigate = useNavigate();
 
-  const activeProjectsCount = projects.filter((p) => p.status !== 'Live').length;
-  const completedProjectsCount = projects.filter((p) => p.status === 'Live').length;
-  const pendingApprovalsCount = projects.filter(
-    (p) => !p.requirementsApproved || !p.architectureApproved
-  ).length;
-
-  // Highlighted project that needs attention
-  const projectNeedingAttention =
-    projects.find((p) => !p.deployed && p.status !== 'Live') || projects[0];
+  // Focus project is the most active non-completed project, or the first project
+  const focusProject = projects.find((p) => !p.deployed && p.status !== 'Live') || projects[0];
 
   const handleOpenProject = (project) => {
     setActiveProjectId(project.id);
@@ -39,283 +20,297 @@ export default function DashboardPage() {
 
   return (
     <div className="workspace-page">
-      {/* Page Header */}
+      {/* Workspace Header */}
       <div className="page-header-row">
         <div>
-          <h1 className="page-header-title">Welcome back, {currentUser?.name || 'Engineer'}</h1>
+          <h1 className="page-header-title">Workspace</h1>
           <p className="page-header-subtitle">
-            Here is what your AI agents are building and what needs your attention.
+            Welcome back, {currentUser?.name || 'Engineer'}. Here is your current work and next actions.
           </p>
         </div>
-        <Link to="/create-project" className="btn btn-primary">
-          <PlusCircle size={17} />
-          <span>Create New Project</span>
+
+        <Link to="/create-project" className="btn btn-primary btn-sm">
+          <Plus size={14} />
+          <span>New Project</span>
         </Link>
       </div>
 
-      {/* Overview Metrics */}
-      <div className="metrics-row">
-        <div className="metric-card">
-          <span className="metric-card-label">Active Projects</span>
-          <span className="metric-card-value">{activeProjectsCount}</span>
-          <span className="metric-card-desc">Moving through the SDLC</span>
-        </div>
-
-        <div className="metric-card">
-          <span className="metric-card-label">Completed Applications</span>
-          <span className="metric-card-value">{completedProjectsCount}</span>
-          <span className="metric-card-desc">Live on production edge</span>
-        </div>
-
-        <div className="metric-card">
-          <span className="metric-card-label">Pending Approvals</span>
-          <span className="metric-card-value" style={{ color: 'var(--warning)' }}>
-            {pendingApprovalsCount}
-          </span>
-          <span className="metric-card-desc">Human-in-the-loop decisions</span>
-        </div>
-
-        <div className="metric-card">
-          <span className="metric-card-label">Agent Health & Uptime</span>
-          <span className="metric-card-value" style={{ color: 'var(--success)' }}>
-            99.8%
-          </span>
-          <span className="metric-card-desc">All specialized agents active</span>
-        </div>
-      </div>
-
-      {/* Current Project Needing Attention */}
-      {projectNeedingAttention && (
-        <div className="panel-card" style={{ borderColor: 'var(--accent-subtle-border)' }}>
-          <div className="panel-header">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span className="badge-pill">
-                <Sparkles size={13} />
-                <span>Needs Your Input</span>
-              </span>
-              <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-                Active focus project
-              </span>
-            </div>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              onClick={() => handleOpenProject(projectNeedingAttention)}
-            >
-              <span>{projectNeedingAttention.nextAction}</span>
-              <ArrowRight size={15} />
-            </button>
-          </div>
-
+      {/* 1. Primary Focus: Active Project */}
+      {focusProject && (
+        <div
+          className="workspace-doc"
+          style={{
+            padding: '24px 28px',
+            marginBottom: '28px',
+            borderColor: 'var(--border-color)',
+            background: 'var(--bg-card)',
+          }}
+        >
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: 20,
+              marginBottom: '16px',
             }}
           >
-            <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 4 }}>
-                {projectNeedingAttention.name}
-              </h2>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', maxWidth: 640 }}>
-                {projectNeedingAttention.description}
-              </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span
+                style={{
+                  fontSize: '0.6875rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                Current Focus
+              </span>
+              <span className="status-indicator">
+                <span className="status-dot in-progress" />
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  Stage: {focusProject.stage.replace(/_/g, ' ')}
+                </span>
+              </span>
             </div>
 
-            <div style={{ minWidth: 200 }}>
-              <div
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Progress: {focusProject.progress}%
+            </span>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '20px',
+            }}
+          >
+            <div style={{ maxWidth: '640px' }}>
+              <h2
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  marginBottom: 6,
+                  fontSize: '1.25rem',
+                  fontWeight: 700,
+                  letterSpacing: '-0.015em',
+                  marginBottom: '6px',
+                  color: 'var(--text-primary)',
                 }}
               >
-                <span>Stage: {projectNeedingAttention.stage.replace('_', ' ')}</span>
-                <span style={{ color: 'var(--accent-primary)' }}>
-                  {projectNeedingAttention.progress}%
-                </span>
-              </div>
-              <div
+                {focusProject.name}
+              </h2>
+              <p
                 style={{
-                  height: 6,
-                  width: '100%',
-                  backgroundColor: 'var(--bg-secondary)',
-                  borderRadius: 3,
-                  overflow: 'hidden',
+                  fontSize: '0.875rem',
+                  color: 'var(--text-secondary)',
+                  lineHeight: '1.5',
+                  marginBottom: '12px',
                 }}
               >
-                <div
-                  style={{
-                    height: '100%',
-                    width: `${projectNeedingAttention.progress}%`,
-                    backgroundColor: 'var(--accent-primary)',
-                    borderRadius: 3,
-                  }}
-                />
+                {focusProject.description}
+              </p>
+
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.8125rem',
+                  color: 'var(--accent-primary)',
+                  fontWeight: 500,
+                }}
+              >
+                <span>Next: {focusProject.nextAction}</span>
               </div>
             </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => handleOpenProject(focusProject)}
+              >
+                <span>Continue</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
+          </div>
+
+          {/* Clean linear progress bar */}
+          <div
+            style={{
+              height: '3px',
+              width: '100%',
+              backgroundColor: 'var(--bg-secondary)',
+              borderRadius: '2px',
+              overflow: 'hidden',
+              marginTop: '20px',
+            }}
+          >
+            <div
+              style={{
+                height: '100%',
+                width: `${focusProject.progress}%`,
+                backgroundColor: 'var(--accent-primary)',
+                transition: 'width 300ms ease',
+              }}
+            />
           </div>
         </div>
       )}
 
-      {/* Grid: Recent Projects (Left 2/3) + Recent AI Activity (Right 1/3) */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1.4fr 1fr',
-          gap: 24,
-        }}
-      >
-        {/* Recent Projects Table */}
-        <div className="panel-card" style={{ margin: 0 }}>
-          <div className="panel-header">
-            <h3 className="panel-title">Recent Projects</h3>
-            <Link to="/projects" className="btn btn-ghost btn-sm">
-              <span>View All</span>
-              <ChevronRight size={14} />
+      {/* 2. Split Layout: Projects Table (Left) + Activity Log (Right) */}
+      <div className="dashboard-split-grid">
+        {/* Projects Section */}
+        <div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '10px',
+            }}
+          >
+            <h2
+              style={{
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                color: 'var(--text-muted)',
+              }}
+            >
+              My Projects ({projects.length})
+            </h2>
+            <Link
+              to="/projects"
+              style={{
+                fontSize: '0.75rem',
+                color: 'var(--text-secondary)',
+                textDecoration: 'none',
+                fontWeight: 500,
+              }}
+            >
+              View all &rarr;
             </Link>
           </div>
 
-          <div className="table-container" style={{ border: 'none' }}>
-            <table className="data-table">
+          <div className="data-table-container">
+            <table className="clean-table">
               <thead>
                 <tr>
                   <th>Project</th>
-                  <th>Current Stage</th>
-                  <th>Progress</th>
+                  <th>Stage</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  <th style={{ textAlign: 'right' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {projects.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{p.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        {p.category}
-                      </div>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.8125rem' }}>
-                        {p.stage.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {projects.map((p) => {
+                  const isLive = p.status === 'Live';
+                  return (
+                    <tr key={p.id}>
+                      <td>
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{p.name}</div>
                         <div
                           style={{
-                            width: 60,
-                            height: 5,
-                            backgroundColor: 'var(--border-color)',
-                            borderRadius: 3,
-                            overflow: 'hidden',
+                            fontSize: '0.6875rem',
+                            color: 'var(--text-muted)',
+                            textTransform: 'capitalize',
                           }}
                         >
-                          <div
-                            style={{
-                              width: `${p.progress}%`,
-                              height: '100%',
-                              backgroundColor:
-                                p.progress === 100
-                                  ? 'var(--success)'
-                                  : 'var(--accent-primary)',
-                            }}
-                          />
+                          {p.category.replace(/_/g, ' ')}
                         </div>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {p.progress}%
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                          {p.stage.replace(/_/g, ' ')}
                         </span>
-                      </div>
-                    </td>
-                    <td>
-                      <span
-                        className={`status-pill ${
-                          p.status === 'Live'
-                            ? 'success'
-                            : p.status === 'In Progress'
-                            ? 'in-progress'
-                            : 'warning'
-                        }`}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => handleOpenProject(p)}
-                      >
-                        Open
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td>
+                        <span className="status-indicator">
+                          <span
+                            className={`status-dot ${
+                              isLive ? 'success' : p.status === 'In Progress' ? 'in-progress' : 'neutral'
+                            }`}
+                          />
+                          <span style={{ fontSize: '0.75rem' }}>{p.status}</span>
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => handleOpenProject(p)}
+                          style={{ fontSize: '0.75rem', padding: '4px 8px' }}
+                        >
+                          Open &rarr;
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* AI Agent Activity Feed */}
-        <div className="panel-card" style={{ margin: 0 }}>
-          <div className="panel-header">
-            <h3 className="panel-title">Recent AI Activity</h3>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Live Feed</span>
+        {/* Concise Activity Log */}
+        <div>
+          <div style={{ marginBottom: '10px' }}>
+            <h2
+              style={{
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                color: 'var(--text-muted)',
+              }}
+            >
+              Recent Activity
+            </h2>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {MOCK_AGENT_ACTIVITY.map((act) => (
+          <div
+            style={{
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-sm)',
+              backgroundColor: 'var(--bg-card)',
+              padding: '14px 16px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+            }}
+          >
+            {MOCK_AGENT_ACTIVITY.slice(0, 4).map((item) => (
               <div
-                key={act.id}
+                key={item.id}
                 style={{
-                  display: 'flex',
-                  gap: 12,
-                  alignItems: 'flex-start',
-                  paddingBottom: 12,
+                  fontSize: '0.8125rem',
+                  lineHeight: '1.4',
                   borderBottom: '1px solid var(--border-subtle)',
+                  paddingBottom: '10px',
                 }}
               >
                 <div
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 'var(--radius-md)',
-                    backgroundColor: 'var(--accent-subtle)',
-                    color: 'var(--accent-primary)',
                     display: 'flex',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
+                    marginBottom: '3px',
                   }}
                 >
-                  <Activity size={16} />
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.75rem' }}>
+                    {item.agent}
+                  </span>
+                  <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
+                    {item.timestamp}
+                  </span>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 2,
-                    }}
-                  >
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {act.agent}
-                    </span>
-                    <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
-                      {act.timestamp}
-                    </span>
-                  </div>
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                    {act.message}
-                  </p>
-                </div>
+                <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.75rem' }}>
+                  {item.message}
+                </p>
               </div>
             ))}
           </div>

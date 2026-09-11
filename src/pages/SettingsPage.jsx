@@ -15,7 +15,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 
 export default function SettingsPage() {
   const { currentUser } = useAuth();
-  const [theme, setTheme] = useState(() => localStorage.getItem('autodevai-theme') || 'dark');
+  const [theme, setTheme] = useState(() => localStorage.getItem('autodevai_theme') || 'dark');
   const [notification, setNotification] = useState('');
 
   // Preference switches
@@ -26,7 +26,7 @@ export default function SettingsPage() {
   const handleThemeChange = (newTheme) => {
     setTheme(newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('autodevai-theme', newTheme);
+    localStorage.setItem('autodevai_theme', newTheme);
     setNotification(`Theme changed to ${newTheme} mode.`);
     setTimeout(() => setNotification(''), 2500);
   };

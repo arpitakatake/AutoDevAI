@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Sparkles,
-  ArrowRight,
-  Lightbulb,
-  FileText,
-  Boxes,
-  Code2,
-  CheckCircle2,
-  Cloud,
-  AlertCircle,
-} from 'lucide-react';
+import { ArrowRight, AlertCircle } from 'lucide-react';
 import { useProject } from '../context/ProjectContext.jsx';
 
 export default function CreateProjectPage() {
@@ -24,7 +14,6 @@ export default function CreateProjectPage() {
 
   useEffect(() => {
     if (location.state?.initialIdea && !name) {
-      // Propose a clean name based on the prompt
       const words = location.state.initialIdea
         .replace(/^(build|create|make|i want to build|an?)\s+/i, '')
         .split(' ')
@@ -37,41 +26,41 @@ export default function CreateProjectPage() {
     }
   }, [location.state, name]);
 
-  const exampleIdeas = [
+  const starterTemplates = [
     {
       title: 'College Attendance System',
       name: 'CampusAttend',
       type: 'education',
-      idea: 'I want to build a college attendance management system where professors start sessions with rotating QR codes, students scan to check in, and automated alerts are sent when attendance drops below 75%.',
+      idea: 'A college attendance management tool where instructors start sessions with rotating QR codes, students scan to check in, and automated alerts are sent when attendance drops below 75%.',
     },
     {
-      title: 'Luxury Jewelry Store',
-      name: 'JewelCraft',
-      type: 'ecommerce',
-      idea: 'An online luxury jewelry store featuring high-res product galleries, custom engraving options, Stripe checkout, guest purchases, and shipment tracking.',
-    },
-    {
-      title: 'Agile Task Manager',
+      title: 'Team Task Board',
       name: 'TaskFlow',
       type: 'task_management',
-      idea: 'Build a modern team task management app with Kanban boards, sprint backlogs, priority flags, deadline reminders, and Slack webhook alerts.',
+      idea: 'A team task planner with columns for To Do, In Progress, and Done, deadline dates, priority flags, and reminder alerts.',
     },
     {
-      title: 'Patient Telehealth Portal',
+      title: 'Online Jewelry Store',
+      name: 'JewelCraft',
+      type: 'ecommerce',
+      idea: 'An online storefront for custom jewelry with high-res product galleries, custom engraving options, Stripe checkout, and customer order tracking.',
+    },
+    {
+      title: 'Clinic Telehealth Portal',
       name: 'CarePulse',
       type: 'healthcare',
-      idea: 'A telehealth clinic portal where patients can schedule video appointments, doctors can upload digital prescriptions, and health records are securely encrypted.',
+      idea: 'A patient clinic portal where patients can schedule appointments, doctors upload digital prescriptions, and medical records are securely encrypted.',
     },
   ];
 
-  const handleApplyExample = (ex) => {
-    setName(ex.name);
-    setType(ex.type);
-    setIdea(ex.idea);
+  const handleApplyTemplate = (tmpl) => {
+    setName(tmpl.name);
+    setType(tmpl.type);
+    setIdea(tmpl.idea);
     setError('');
   };
 
-  const handleStartBuilding = (e) => {
+  const handleStart = (e) => {
     e.preventDefault();
     if (!name.trim()) {
       setError('Please provide a name for your project.');
@@ -87,20 +76,41 @@ export default function CreateProjectPage() {
   };
 
   return (
-    <div className="workspace-page" style={{ maxWidth: 840 }}>
+    <div className="workspace-page" style={{ maxWidth: '780px' }}>
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: 36 }}>
-        <span className="badge-pill" style={{ marginBottom: 12 }}>
-          <Sparkles size={13} />
-          <span>Intelligent Project Inception</span>
-        </span>
-        <h1 style={{ fontSize: '2.25rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 10 }}>
-          What do you want to build?
-        </h1>
-        <p style={{ fontSize: '1.0625rem', color: 'var(--text-secondary)', maxWidth: 580, margin: '0 auto' }}>
-          Describe your idea in your own words. AutoDevAI&apos;s Requirement Agent will analyze your prompt
-          and guide it through to a production-ready application.
+      <div style={{ marginBottom: '28px' }}>
+        <h1 className="page-header-title">Create New Application</h1>
+        <p className="page-header-subtitle">
+          Describe what you want to build in simple words. You don&apos;t need to know how to code — AutoDevAI will understand your idea and guide you through each step.
         </p>
+      </div>
+
+      {/* 5-Step Simple Roadmap Banner */}
+      <div
+        style={{
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-sm)',
+          backgroundColor: 'var(--bg-secondary)',
+          padding: '12px 18px',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px',
+          fontSize: '0.75rem',
+          color: 'var(--text-secondary)',
+        }}
+      >
+        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Your Idea</span>
+        <span>&rarr;</span>
+        <span>Answer Questions</span>
+        <span>&rarr;</span>
+        <span>Requirements</span>
+        <span>&rarr;</span>
+        <span>Architecture</span>
+        <span>&rarr;</span>
+        <span style={{ color: 'var(--success)', fontWeight: 600 }}>Application Built</span>
       </div>
 
       {error && (
@@ -108,46 +118,45 @@ export default function CreateProjectPage() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            padding: '12px 16px',
-            borderRadius: 'var(--radius-md)',
+            gap: '8px',
+            padding: '10px 14px',
+            borderRadius: 'var(--radius-sm)',
             backgroundColor: 'var(--error-subtle)',
             color: 'var(--error)',
-            fontSize: '0.875rem',
-            marginBottom: 20,
+            fontSize: '0.8125rem',
+            marginBottom: '18px',
           }}
         >
-          <AlertCircle size={16} />
+          <AlertCircle size={15} />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Main Creation Form */}
-      <div className="panel-card" style={{ padding: '32px 28px' }}>
-        <form onSubmit={handleStartBuilding} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {/* Row 1: Project Name & Type */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 16 }}>
+      {/* Creation Document */}
+      <div className="workspace-doc" style={{ padding: '24px 28px' }}>
+        <form onSubmit={handleStart} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Project Name & Domain */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
             <div>
               <label
                 style={{
                   display: 'block',
                   fontSize: '0.8125rem',
                   fontWeight: 600,
-                  marginBottom: 6,
+                  marginBottom: '6px',
+                  color: 'var(--text-primary)',
                 }}
               >
                 Project Name *
               </label>
-              <div className="hero-input-group" style={{ padding: '8px 14px' }}>
-                <input
-                  type="text"
-                  className="hero-input"
-                  placeholder="e.g. CampusAttend"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
+              <input
+                type="text"
+                className="input-clean"
+                placeholder="e.g. Student Task Planner"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
             </div>
 
             <div>
@@ -156,142 +165,103 @@ export default function CreateProjectPage() {
                   display: 'block',
                   fontSize: '0.8125rem',
                   fontWeight: 600,
-                  marginBottom: 6,
+                  marginBottom: '6px',
+                  color: 'var(--text-primary)',
                 }}
               >
-                Domain / Template (Optional)
+                Category (Optional)
               </label>
               <select
-                className="hero-input-group"
-                style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: 'var(--radius-lg)',
-                  border: '1px solid var(--border-color)',
-                  backgroundColor: 'var(--bg-card)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.875rem',
-                  outline: 'none',
-                }}
+                className="input-clean"
                 value={type}
                 onChange={(e) => setType(e.target.value)}
+                style={{ height: '38px' }}
               >
-                <option value="auto">Auto-detect from idea</option>
-                <option value="education">Education & Campus</option>
-                <option value="ecommerce">E-Commerce & Retail</option>
-                <option value="task_management">Task & Productivity</option>
-                <option value="social">Social & Community</option>
-                <option value="healthcare">Healthcare & Clinic</option>
-                <option value="generic">Custom Software</option>
+                <option value="auto">Auto-detect from my description</option>
+                <option value="task_management">Task &amp; Project Planner</option>
+                <option value="education">School &amp; Classroom</option>
+                <option value="ecommerce">Online Store / Shop</option>
+                <option value="social">Community &amp; Social</option>
+                <option value="healthcare">Clinic &amp; Health</option>
+                <option value="generic">Custom Application</option>
               </select>
             </div>
           </div>
 
-          {/* Row 2: Large Idea Textarea */}
+          {/* Software Description */}
           <div>
             <label
               style={{
                 display: 'block',
                 fontSize: '0.8125rem',
                 fontWeight: 600,
-                marginBottom: 6,
+                marginBottom: '6px',
+                color: 'var(--text-primary)',
               }}
             >
-              Describe your software idea *
+              What do you want your application to do? *
             </label>
             <textarea
-              rows={6}
-              className="hero-input-group"
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border-color)',
-                backgroundColor: 'var(--bg-card)',
-                color: 'var(--text-primary)',
-                fontSize: '0.9375rem',
-                lineHeight: 1.6,
-                resize: 'vertical',
-                outline: 'none',
-              }}
-              placeholder="Example: I want to build a task management application for college students where users can create tasks, set deadlines, organize tasks by priority, and receive reminders..."
+              rows={5}
+              className="textarea-clean"
+              placeholder="Example: I want to build a task management tool for students where they can organize assignments by due date, set priority tags (High, Medium, Low), and receive reminder notifications before deadlines..."
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
               required
             />
+            <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+              Write in plain language. Describe who will use it, what they will do, and what features are important to you.
+            </span>
           </div>
 
-          {/* Quick Example Chips */}
+          {/* Starter Templates */}
           <div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>
-              Or try a prompt template:
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
+              Or start from an example prompt:
             </span>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {exampleIdeas.map((ex) => (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {starterTemplates.map((tmpl) => (
                 <button
-                  key={ex.name}
+                  key={tmpl.name}
                   type="button"
-                  className="chip-tag"
-                  onClick={() => handleApplyExample(ex)}
+                  onClick={() => handleApplyTemplate(tmpl)}
+                  style={{
+                    padding: '5px 10px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-secondary)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                    transition: 'all var(--transition-fast)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--accent-primary)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border-color)';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                  }}
                 >
-                  {ex.title}
+                  {tmpl.title}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Action Button */}
-          <div style={{ marginTop: 8 }}>
+          {/* Submit Action */}
+          <div style={{ paddingTop: '8px', borderTop: '1px solid var(--border-color)' }}>
             <button
               type="submit"
-              className="btn btn-primary btn-lg"
-              style={{ width: '100%', padding: '14px 20px', fontSize: '1rem' }}
+              className="btn btn-primary"
+              style={{ width: '100%', padding: '11px 16px', fontSize: '0.875rem' }}
             >
-              <span>Start Building with AutoDevAI</span>
-              <ArrowRight size={18} />
+              <span>Start Discovery with Requirement Agent</span>
+              <ArrowRight size={15} />
             </button>
           </div>
         </form>
-      </div>
-
-      {/* Compact Workflow Explanation */}
-      <div
-        className="card-clean"
-        style={{
-          padding: '20px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 16,
-          backgroundColor: 'var(--bg-secondary)',
-        }}
-      >
-        <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-          How AutoDevAI builds your idea:
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            fontSize: '0.75rem',
-            color: 'var(--text-secondary)',
-            flexWrap: 'wrap',
-          }}
-        >
-          <span>Your Idea</span>
-          <span>→</span>
-          <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>Requirement Agent</span>
-          <span>→</span>
-          <span>Architecture</span>
-          <span>→</span>
-          <span>Development</span>
-          <span>→</span>
-          <span>Testing & Security</span>
-          <span>→</span>
-          <span style={{ color: 'var(--success)', fontWeight: 600 }}>Deployment</span>
-        </div>
       </div>
     </div>
   );

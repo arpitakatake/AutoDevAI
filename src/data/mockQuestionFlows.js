@@ -1,275 +1,362 @@
 /**
- * Context-aware question flows for the Requirement Agent discovery process.
- * Analyzes the user's idea in natural language and presents domain-relevant questions.
+ * Context-aware discovery interview flows for the Requirement Agent.
+ * Uses beginner-friendly language with clear "Why we're asking" contextual explanations.
  */
 
 export const QUESTION_FLOWS = {
-  education: {
-    category: 'Education & Academic Management',
+  task_management: {
+    category: 'Task & Project Planner',
     initialAnalysis:
-      'Identified an educational domain focus with academic hierarchy, record tracking, and multi-user participation requirements.',
+      'I analyzed your idea. It looks like a task and workflow tracking tool. To structure the right interface and database, I need to clarify a few core decisions.',
+    questions: [
+      {
+        id: 'task-q1',
+        title: 'Task Organization',
+        question: 'How would you like people to organize their tasks?',
+        whyAsking: 'This determines whether we build a simple checklist, a visual column board, or a timeline calendar.',
+        type: 'single',
+        options: [
+          {
+            label: 'Task Board (Columns: To Do, In Progress, Done)',
+            value: 'task_board',
+            desc: 'Visual drag-and-drop cards between progress stages.',
+            agentInsight: 'We will scaffold a visual drag-and-drop board with column status filters.',
+          },
+          {
+            label: 'Simple Structured List',
+            value: 'simple_list',
+            desc: 'A clean checklist with subtasks and check-off boxes.',
+            agentInsight: 'We will design a fast, high-density linear checklist with quick task creation.',
+          },
+          {
+            label: 'Calendar & Deadlines View',
+            value: 'calendar_view',
+            desc: 'Dates, milestones, and upcoming due dates on a calendar.',
+            agentInsight: 'We will build date-based calendar queries and scheduled milestone views.',
+          },
+          {
+            label: "I'm not sure — suggest the best option",
+            value: 'suggest_board',
+            desc: 'Let AutoDevAI recommend a flexible task board structure.',
+            agentInsight: 'We will start with a versatile Task Board which covers both team and personal needs.',
+          },
+        ],
+      },
+      {
+        id: 'task-q2',
+        title: 'User Collaboration',
+        question: 'Who will be working on these tasks?',
+        whyAsking: 'This tells us whether to set up personal user accounts or collaborative team workspaces with assignments.',
+        type: 'single',
+        options: [
+          {
+            label: 'Personal use (Single user managing their own tasks)',
+            value: 'personal',
+            desc: 'No shared workspaces; focused on individual productivity.',
+            agentInsight: 'We will keep the data model focused on individual user ownership without team overhead.',
+          },
+          {
+            label: 'Team collaboration (Assign tasks to team members)',
+            value: 'team',
+            desc: 'Multiple team members with assignment, comments, and mentions.',
+            agentInsight: 'We will add team member assignments, activity histories, and notification triggers.',
+          },
+          {
+            label: 'Company with departments & roles',
+            value: 'enterprise',
+            desc: 'Managers, engineers, and clients with separate permissions.',
+            agentInsight: 'We will configure role-based access control with manager and contributor roles.',
+          },
+        ],
+      },
+      {
+        id: 'task-q3',
+        title: 'Deadlines & Reminders',
+        question: 'What deadline and reminder features do you need?',
+        whyAsking: 'This helps us schedule automated notifications before tasks become overdue.',
+        type: 'multiple',
+        options: [
+          {
+            label: 'Due dates with overdue highlights',
+            value: 'due_dates',
+            agentInsight: 'Tasks approaching their due date will be visually flagged.',
+          },
+          {
+            label: 'Priority levels (Urgent, High, Medium, Low)',
+            value: 'priorities',
+            agentInsight: 'Priority tags will allow sorting and filtering by importance.',
+          },
+          {
+            label: 'Automated email or in-app reminders before due date',
+            value: 'reminders',
+            agentInsight: 'A background scheduler will send reminder alerts 24 hours prior.',
+          },
+          {
+            label: 'Repeating tasks (Daily, weekly, or monthly)',
+            value: 'recurring',
+            agentInsight: 'Recurring task rules will automatically generate fresh task instances.',
+          },
+        ],
+      },
+      {
+        id: 'task-q4',
+        title: 'Notifications & Alerts',
+        question: 'Where should task updates and reminders be sent?',
+        whyAsking: 'This determines which communication services and webhook integrations we wire up.',
+        type: 'multiple',
+        options: [
+          { label: 'In-app notification bell', value: 'in_app' },
+          { label: 'Email digest notifications', value: 'email' },
+          { label: 'Slack or Discord messages', value: 'chat_webhook' },
+        ],
+      },
+    ],
+  },
+
+  education: {
+    category: 'Education & School Portal',
+    initialAnalysis:
+      'I analyzed your idea. It looks like an academic or classroom management tool. Let me ask a few practical questions to shape the student and teacher experience.',
     questions: [
       {
         id: 'edu-q1',
-        title: 'User Roles & Hierarchy',
-        question: 'Who will primarily interact with this application?',
+        title: 'People & Roles',
+        question: 'Who will primarily use this application?',
+        whyAsking: 'This defines the permissions and screens we create for teachers, students, and administrators.',
         type: 'single',
         options: [
-          { label: 'Students & Faculty', value: 'students_faculty', desc: 'Direct classroom interaction' },
-          { label: 'Faculty & Administrative Staff', value: 'faculty_admin', desc: 'Departmental management' },
-          { label: 'All Three: Students, Faculty, and Admin', value: 'all_three', desc: 'Complete institutional coverage' },
-          { label: 'Parents & External Guardians as well', value: 'parents_included', desc: 'Extended visibility' },
+          {
+            label: 'Students and Teachers',
+            value: 'students_teachers',
+            desc: 'Direct classroom roll call, attendance, and grades.',
+            agentInsight: 'We will create separate student views and teacher control panels.',
+          },
+          {
+            label: 'Students, Teachers, and School Staff',
+            value: 'all_roles',
+            desc: 'Includes administration, attendance reports, and department oversight.',
+            agentInsight: 'We will build administrative overview dashboards and class roster management.',
+          },
+          {
+            label: 'Parents as well (to check student attendance & progress)',
+            value: 'include_parents',
+            desc: 'Parent login to view daily attendance records and alerts.',
+            agentInsight: 'We will provide read-only parent portals with automated absence notices.',
+          },
+          {
+            label: "I'm not sure — start with Students & Teachers",
+            value: 'suggest_school',
+            desc: 'Start simple with classroom core roles.',
+            agentInsight: 'We will build a clean foundation for Students and Teachers first.',
+          },
         ],
       },
       {
         id: 'edu-q2',
-        title: 'Tracking & Recording Method',
-        question: 'How should attendance or academic records be captured?',
+        title: 'Attendance & Check-in',
+        question: 'How should attendance or session participation be recorded?',
+        whyAsking: 'This determines whether we need mobile QR scanning features, teacher roll-call lists, or hardware support.',
         type: 'single',
         options: [
-          { label: 'Manual Roster Check-in', value: 'manual', desc: 'Quick digital roll-call by instructor' },
-          { label: 'Dynamic QR Code per Session', value: 'qr_code', desc: 'Students scan expiring screen code' },
-          { label: 'Biometric / RFID Card Hardware', value: 'hardware', desc: 'Physical device sensor integration' },
-          { label: 'Hybrid (Instructor Manual + Student QR)', value: 'hybrid', desc: 'Flexible for any classroom' },
+          {
+            label: 'Quick Digital Roll Call by Teacher',
+            value: 'manual_roster',
+            desc: 'Teacher taps Present/Absent on a classroom roster list.',
+            agentInsight: 'We will build a 1-tap roster grid for fast in-class attendance.',
+          },
+          {
+            label: 'Dynamic QR Code on Projector',
+            value: 'qr_code',
+            desc: 'Teacher displays a code that students scan with their phone camera.',
+            agentInsight: 'We will generate timed QR codes with location and anti-proxy validation.',
+          },
+          {
+            label: 'Both: Teacher Roll Call + Student QR Scanning',
+            value: 'hybrid',
+            desc: 'Flexible for any classroom environment.',
+            agentInsight: 'We will support both modes so teachers can override whenever needed.',
+          },
         ],
       },
       {
         id: 'edu-q3',
-        title: 'Automated Notifications & Warnings',
-        question: 'What automated alert thresholds should be configured?',
+        title: 'Absence Warnings',
+        question: 'What automated alerts should the system send?',
+        whyAsking: 'This configures automatic warnings when students miss classes or fall behind.',
         type: 'multiple',
         options: [
-          { label: 'Low Attendance Warning (<75%)', value: 'low_attendance' },
-          { label: 'Daily Absence Notification to Student & Parent', value: 'daily_absence' },
-          { label: 'Weekly Faculty Summary & Trend Report', value: 'weekly_report' },
-          { label: 'Exam Eligibility Flagging', value: 'exam_eligibility' },
+          { label: 'Warning when attendance drops below 75%', value: 'low_attendance_warning' },
+          { label: 'Same-day absence alert to student and parents', value: 'daily_absence_alert' },
+          { label: 'Weekly summary report for department heads', value: 'weekly_summary' },
+          { label: 'Exam eligibility lock if attendance is insufficient', value: 'exam_lock' },
         ],
       },
       {
         id: 'edu-q4',
-        title: 'LMS & Database Integration',
-        question: 'Does this platform need to connect with existing institutional systems?',
+        title: 'School Systems Integration',
+        question: 'Does this need to connect with existing school databases?',
+        whyAsking: 'This decides whether the app is completely self-contained or requires database sync.',
         type: 'single',
         options: [
-          { label: 'Standalone Application', value: 'standalone', desc: 'Self-contained database and auth' },
-          { label: 'Google Classroom / Canvas LMS', value: 'lms', desc: 'Roster import and grade passback' },
-          { label: 'Custom College ERP / SQL Database', value: 'erp', desc: 'Direct enterprise database sync' },
-          { label: 'Exportable CSV / Excel Only', value: 'export_only', desc: 'Simple periodic data dump' },
+          { label: 'Standalone (Has its own independent login and student database)', value: 'standalone' },
+          { label: 'Connect to Google Classroom or Canvas LMS', value: 'google_classroom' },
+          { label: 'Exportable Excel / CSV reports only', value: 'csv_export' },
         ],
       },
     ],
   },
 
   ecommerce: {
-    category: 'E-Commerce & Digital Storefront',
+    category: 'Online Store & E-Commerce',
     initialAnalysis:
-      'Identified a commerce/transactional platform with catalog, shopping cart, checkout, and inventory workflow requirements.',
+      'I analyzed your idea. It looks like an e-commerce storefront. Let me clarify what you are selling and how customers will pay.',
     questions: [
       {
         id: 'ecom-q1',
-        title: 'Product Catalog Type',
-        question: 'What types of merchandise or services will be sold?',
+        title: 'Products Being Sold',
+        question: 'What types of items or services will you sell?',
+        whyAsking: 'Physical products require inventory tracking and shipping, while digital items deliver instant downloads.',
         type: 'single',
         options: [
-          { label: 'Physical Products with Inventory', value: 'physical', desc: 'Requires shipping and stock counts' },
-          { label: 'Digital Downloads & Licenses', value: 'digital', desc: 'Instant fulfillment upon payment' },
-          { label: 'Custom Artisanal / Made-to-Order Items', value: 'custom_items', desc: 'Variations & engraving options' },
-          { label: 'Multi-Vendor Marketplace', value: 'multi_vendor', desc: 'Multiple sellers with seller dashboard' },
+          {
+            label: 'Physical Products with Stock & Inventory',
+            value: 'physical',
+            desc: 'Requires stock counts, variants (sizes, colors), and shipping address.',
+            agentInsight: 'We will add inventory count tracking and shipping calculator.',
+          },
+          {
+            label: 'Custom / Made-to-order Goods (e.g. jewelry, engraved items)',
+            value: 'custom_crafted',
+            desc: 'Requires customer engraving notes and custom order specifications.',
+            agentInsight: 'We will add custom text fields and personalization options on product pages.',
+          },
+          {
+            label: 'Digital Downloads / Courses',
+            value: 'digital',
+            desc: 'Instant access or download link delivered after checkout.',
+            agentInsight: 'We will configure instant download links after payment verification.',
+          },
         ],
       },
       {
         id: 'ecom-q2',
-        title: 'Payment Gateways & Methods',
-        question: 'Which payment options must be supported at checkout?',
+        title: 'Checkout & Payments',
+        question: 'How should customers pay at checkout?',
+        whyAsking: 'This tells us which payment processors and checkout flows to wire up.',
         type: 'multiple',
         options: [
-          { label: 'Stripe (Credit / Debit Card)', value: 'stripe' },
+          { label: 'Credit & Debit Cards (via Stripe)', value: 'stripe' },
           { label: 'Apple Pay & Google Pay', value: 'wallets' },
-          { label: 'PayPal Integration', value: 'paypal' },
+          { label: 'PayPal Checkout', value: 'paypal' },
           { label: 'Cash on Delivery (COD)', value: 'cod' },
         ],
       },
       {
         id: 'ecom-q3',
-        title: 'Fulfillment & Order Tracking',
-        question: 'How should order tracking and delivery updates work?',
+        title: 'Order Tracking',
+        question: 'How should customers track their order status?',
+        whyAsking: 'This defines the customer order history portal and email tracking links.',
         type: 'single',
         options: [
-          { label: 'Automated Carrier Tracking API', value: 'carrier_api', desc: 'FedEx, UPS, DHL live tracking link' },
-          { label: 'Internal Status Stages', value: 'internal_stages', desc: 'Order Placed → Packed → Shipped → Delivered' },
-          { label: 'Local Store Pickup / Click & Collect', value: 'pickup', desc: 'Ready-for-pickup notifications' },
+          { label: 'Order Status Page (Placed → Packed → Shipped → Delivered)', value: 'status_page' },
+          { label: 'Courier Tracking Link (FedEx, UPS, DHL tracking number)', value: 'courier_api' },
+          { label: 'Store Pickup Notification (Ready for in-person pickup)', value: 'store_pickup' },
         ],
       },
       {
         id: 'ecom-q4',
-        title: 'Customer Authentication',
-        question: 'What account policy applies to shoppers?',
+        title: 'Customer Accounts',
+        question: 'Should customers be required to create an account?',
+        whyAsking: 'Guest checkout reduces checkout friction, while mandatory accounts help build customer loyalty.',
         type: 'single',
         options: [
-          { label: 'Guest Checkout + Optional Account', value: 'guest_allowed', desc: 'Frictionless conversion' },
-          { label: 'Mandatory Customer Registration', value: 'mandatory_account', desc: 'Order history & saved wishlists' },
-          { label: 'Social Login (Google, Apple)', value: 'social_login', desc: 'One-click sign in and checkout' },
-        ],
-      },
-    ],
-  },
-
-  task_management: {
-    category: 'Productivity & Task Management',
-    initialAnalysis:
-      'Identified a task, sprint, or workflow tracking system requiring organization, priority states, deadlines, and notifications.',
-    questions: [
-      {
-        id: 'task-q1',
-        title: 'Task Organization Model',
-        question: 'How should tasks be visualized and managed?',
-        type: 'single',
-        options: [
-          { label: 'Kanban Board (Columns: Todo, Doing, Done)', value: 'kanban', desc: 'Visual drag-and-drop workflow' },
-          { label: 'Sprint-based Agile Board with Backlog', value: 'agile', desc: 'Epics, story points, sprint milestones' },
-          { label: 'Structured Linear List with Nested Sub-tasks', value: 'list', desc: 'High-density checklist interface' },
-          { label: 'Timeline & Gantt Calendar View', value: 'gantt', desc: 'Milestones, dependencies, and dates' },
-        ],
-      },
-      {
-        id: 'task-q2',
-        title: 'Collaboration & Assignment',
-        question: 'How are tasks delegated across users?',
-        type: 'single',
-        options: [
-          { label: 'Single Assignee per Task', value: 'single_assignee', desc: 'Clear individual accountability' },
-          { label: 'Multiple Assignees & Reviewers', value: 'multi_assignee', desc: 'Collaborative team ownership' },
-          { label: 'Role-Based Tagging (Engineering, Design, QA)', value: 'role_tagging', desc: 'Cross-functional pipelines' },
-        ],
-      },
-      {
-        id: 'task-q3',
-        title: 'Priorities & Deadlines',
-        question: 'What deadline and reminder features are critical?',
-        type: 'multiple',
-        options: [
-          { label: 'Strict Due Dates with Overdue Highlights', value: 'due_dates' },
-          { label: 'Priority Levels (Urgent, High, Medium, Low)', value: 'priority_levels' },
-          { label: 'Automated Reminders (24h before due)', value: 'reminders' },
-          { label: 'Recurring Tasks (Daily, Weekly, Monthly)', value: 'recurring' },
-        ],
-      },
-      {
-        id: 'task-q4',
-        title: 'Notifications & Integrations',
-        question: 'Where should task updates and mentions be delivered?',
-        type: 'multiple',
-        options: [
-          { label: 'In-App Notification Center', value: 'in_app' },
-          { label: 'Email Digest Notifications', value: 'email' },
-          { label: 'Slack / Discord Webhook Alerts', value: 'slack_discord' },
-          { label: 'Browser Desktop Push Alerts', value: 'push' },
+          { label: 'Allow Guest Checkout (Quick purchase without creating password)', value: 'guest_allowed' },
+          { label: 'Mandatory Account (Customer registers to save addresses & order history)', value: 'mandatory_account' },
         ],
       },
     ],
   },
 
   social: {
-    category: 'Social Platform & Community',
+    category: 'Community & Social App',
     initialAnalysis:
-      'Identified a community-driven application with user profiles, dynamic media feeds, discovery, and messaging.',
+      'I analyzed your idea. It looks like a social community platform. Let me clarify what content users share and how they discover each other.',
     questions: [
       {
         id: 'soc-q1',
-        title: 'Primary Content Medium',
-        question: 'What is the main format of user-generated content?',
+        title: 'Content Format',
+        question: 'What is the main format of posts people will share?',
+        whyAsking: 'This shapes the feed layout and storage for text, images, or discussion threads.',
         type: 'single',
         options: [
-          { label: 'Rich Text & Multi-Image Posts', value: 'text_image', desc: 'Thoughtful micro-blogging and galleries' },
-          { label: 'Short-Form Video Reels', value: 'video', desc: 'Vertical video feed and audio tracks' },
-          { label: 'Discussion Threads & Upvoting', value: 'forum', desc: 'Topic-based community boards' },
+          { label: 'Photos and Text Updates', value: 'photos_text', desc: 'Feed with image galleries and captions.' },
+          { label: 'Discussion Forum / Questions & Answers', value: 'forum_threads', desc: 'Topics, upvoting, and comment threads.' },
+          { label: 'Short Video Clips', value: 'short_video', desc: 'Vertical video feed and audio tracks.' },
         ],
       },
       {
         id: 'soc-q2',
-        title: 'Feed Algorithm & Discovery',
-        question: 'How should users discover content?',
+        title: 'Discovery & Feeds',
+        question: 'How should people see new posts?',
+        whyAsking: 'This decides how feed algorithms sort posts.',
         type: 'single',
         options: [
-          { label: 'Chronological Following Feed', value: 'chronological', desc: 'Only see posts from accounts followed' },
-          { label: 'Engagement-Based Discovery Feed', value: 'algorithmic', desc: 'Personalized recommendations' },
-          { label: 'Topic Channels & Hashtags', value: 'channels', desc: 'Community categories and tags' },
+          { label: 'Chronological (See latest posts from accounts you follow)', value: 'chronological' },
+          { label: 'Topic Channels (Browse by interest, hashtag, or category)', value: 'topics' },
         ],
       },
       {
         id: 'soc-q3',
-        title: 'Privacy & Moderation',
-        question: 'What profile visibility and moderation rules apply?',
+        title: 'Direct Messaging',
+        question: 'Do users need private messaging?',
+        whyAsking: 'This decides whether we build a real-time private 1-on-1 chat feature.',
         type: 'single',
         options: [
-          { label: 'Public by Default (Open Network)', value: 'public', desc: 'Anyone can view posts' },
-          { label: 'Private Follower Approval Required', value: 'private', desc: 'Users approve who views their feed' },
-          { label: 'Automated AI Content Moderation Filter', value: 'ai_moderation', desc: 'Auto-flag hate speech/spam' },
-        ],
-      },
-      {
-        id: 'soc-q4',
-        title: 'Direct Interaction',
-        question: 'What direct communication features are required?',
-        type: 'multiple',
-        options: [
-          { label: '1-on-1 Direct Messaging (Chat)', value: 'dm_chat' },
-          { label: 'Group Chats with Sharing', value: 'group_chat' },
-          { label: 'Post Comments & Nested Replies', value: 'comments' },
-          { label: 'Emoji Reactions & Bookmarking', value: 'reactions' },
+          { label: 'Yes, private 1-on-1 chat between users', value: 'direct_chat' },
+          { label: 'Public comments only (No private messaging needed)', value: 'public_comments_only' },
         ],
       },
     ],
   },
 
   healthcare: {
-    category: 'Healthcare & Clinical Portal',
+    category: 'Healthcare & Clinic Portal',
     initialAnalysis:
-      'Identified a healthcare management system with sensitive health records, appointment scheduling, and doctor-patient communication.',
+      'I analyzed your idea. It looks like a healthcare or patient portal. Because health information is sensitive, let me clarify patient scheduling and records.',
     questions: [
       {
         id: 'health-q1',
-        title: 'Primary Stakeholders',
-        question: 'Who will use this healthcare application?',
+        title: 'Appointments',
+        question: 'How will patient appointments be held?',
+        whyAsking: 'This dictates whether we build video consultation or in-clinic calendar slots.',
         type: 'single',
         options: [
-          { label: 'Patients and Attending Physicians', value: 'patient_doctor', desc: 'Direct clinical care' },
-          { label: 'Clinic Staff, Doctors, and Patients', value: 'clinic_all', desc: 'Front-desk scheduling & records' },
-          { label: 'Pharmacy & Diagnostic Lab Integration', value: 'pharmacy_lab', desc: 'Prescription & lab test dispatch' },
+          { label: 'In-Clinic Visits with Time Slot Booking', value: 'in_person' },
+          { label: 'Telehealth Video Consultations', value: 'telehealth' },
+          { label: 'Both In-Person and Video Appointments', value: 'hybrid_appointments' },
         ],
       },
       {
         id: 'health-q2',
-        title: 'Appointment Consultation Mode',
-        question: 'How will patient appointments be held?',
-        type: 'single',
+        title: 'Medical Records',
+        question: 'What records will doctors and patients view in the portal?',
+        whyAsking: 'This defines secure health document storage and download permissions.',
+        type: 'multiple',
         options: [
-          { label: 'In-Clinic Physical Appointments', value: 'in_person', desc: 'Queue & time slot management' },
-          { label: 'Telehealth Video Consultation', value: 'telehealth', desc: 'Integrated encrypted video calls' },
-          { label: 'Both In-Person and Telehealth', value: 'hybrid', desc: 'Patient choice during booking' },
+          { label: 'Digital Prescriptions (PDF download)', value: 'prescriptions' },
+          { label: 'Lab & Diagnostic Test Results', value: 'lab_results' },
+          { label: 'Medical History & Allergies Log', value: 'medical_history' },
         ],
       },
       {
         id: 'health-q3',
-        title: 'Medical Records & Prescriptions',
-        question: 'What health record features are needed?',
-        type: 'multiple',
-        options: [
-          { label: 'Digital Prescription Generation (PDF)', value: 'prescriptions' },
-          { label: 'Lab Test Results & Diagnostic Uploads', value: 'lab_results' },
-          { label: 'Medical History & Allergy Log', value: 'medical_history' },
-          { label: 'Medication Schedule & Refill Reminders', value: 'refill_reminders' },
-        ],
-      },
-      {
-        id: 'health-q4',
-        title: 'Compliance & Security',
-        question: 'What data protection standards are required?',
+        title: 'Privacy & Security',
+        question: 'What level of privacy protection is required?',
+        whyAsking: 'Medical data requires strict end-to-end encryption and audit logging.',
         type: 'single',
         options: [
-          { label: 'HIPAA & GDPR Compliant Encrypted Vault', value: 'hipaa', desc: 'Full audit trails and data encryption' },
-          { label: 'Standard Clinical Data Encryption (AES-256)', value: 'standard_aes', desc: 'Protected health storage' },
-          { label: 'Role-Based Doctor/Nurse Access Controls', value: 'rbac', desc: 'Strict permission boundary' },
+          { label: 'HIPAA & GDPR Standard Healthcare Encryption (AES-256 with audit trail)', value: 'hipaa' },
+          { label: 'Standard Protected User Authentication', value: 'standard' },
         ],
       },
     ],
@@ -278,54 +365,56 @@ export const QUESTION_FLOWS = {
   generic: {
     category: 'Custom Software Application',
     initialAnalysis:
-      'Identified a custom software product idea. AutoDevAI will analyze user personas, core transactions, and technical architecture.',
+      'I analyzed your idea. To establish the right architecture, let me ask a few foundational questions about your users and core workflow.',
     questions: [
       {
         id: 'gen-q1',
-        title: 'Target Audience & Access',
-        question: 'Who is the primary user base for this application?',
+        title: 'Primary Audience',
+        question: 'Who will primarily use this application?',
+        whyAsking: 'This helps us decide whether to design for internal staff, general consumers, or businesses.',
         type: 'single',
         options: [
-          { label: 'Internal Business / Company Staff', value: 'internal', desc: 'Secure company operational tool' },
-          { label: 'Public Consumers / General Audience', value: 'b2c', desc: 'High-volume user accounts' },
-          { label: 'B2B Enterprise Clients', value: 'b2b', desc: 'Multi-tenant organization accounts' },
-          { label: 'Technical Developers / Engineers', value: 'dev_tools', desc: 'API and workflow automation' },
+          { label: 'Internal Business Staff / Employees', value: 'internal' },
+          { label: 'Public Consumers (General audience)', value: 'consumers' },
+          { label: 'Business Clients (B2B multi-tenant)', value: 'b2b' },
+          { label: "I'm not sure — keep it flexible", value: 'flexible' },
         ],
       },
       {
         id: 'gen-q2',
-        title: 'Core System Workflow',
-        question: 'What is the primary action users take inside the app?',
+        title: 'Main Activity',
+        question: 'What is the primary action someone takes inside your app?',
+        whyAsking: 'This identifies the main screen and primary database records to build first.',
         type: 'single',
         options: [
-          { label: 'Analytics Dashboard & Reporting', value: 'analytics', desc: 'Viewing metrics and trends' },
-          { label: 'Transactional Workflow & Forms', value: 'transactional', desc: 'Creating and approving records' },
-          { label: 'Collaborative Workspace', value: 'collaboration', desc: 'Multi-user real-time teamwork' },
-          { label: 'Content Creation & Asset Library', value: 'content_mgmt', desc: 'Publishing and managing files' },
+          { label: 'Viewing a Dashboard & Reports', value: 'dashboard' },
+          { label: 'Filling out Forms & Submitting Records', value: 'forms' },
+          { label: 'Collaborating in a Workspace with Others', value: 'collaboration' },
+          { label: 'Managing Files & Content', value: 'content' },
         ],
       },
       {
         id: 'gen-q3',
-        title: 'Authentication & Security',
-        question: 'How should users authenticate securely?',
+        title: 'Accounts & Login',
+        question: 'How should users log into your app?',
+        whyAsking: 'This selects the authentication strategy for your user accounts.',
         type: 'multiple',
         options: [
-          { label: 'Standard Email & Password + 2FA', value: 'email_2fa' },
-          { label: 'Social Sign-In (Google / GitHub / Apple)', value: 'social_oauth' },
-          { label: 'Single Sign-On (SAML / Okta)', value: 'sso' },
-          { label: 'Passwordless Magic Links', value: 'magic_link' },
+          { label: 'Email and password with email verification', value: 'email_password' },
+          { label: 'Google or GitHub one-click login', value: 'social_login' },
+          { label: 'Two-factor authentication (2FA) for extra security', value: 'two_factor' },
         ],
       },
       {
         id: 'gen-q4',
-        title: 'Data Storage & Export',
-        question: 'What data handling capabilities are needed?',
-        type: 'multiple',
+        title: 'Data Export',
+        question: 'Do users need to export their data?',
+        whyAsking: 'This determines whether we build Excel, CSV, or PDF download generators.',
+        type: 'single',
         options: [
-          { label: 'Real-Time Database Sync', value: 'realtime' },
-          { label: 'Automated Daily Backups', value: 'backups' },
-          { label: 'CSV / PDF Report Exporting', value: 'export' },
-          { label: 'REST / GraphQL API Access', value: 'api_access' },
+          { label: 'Yes, allow downloading reports as Excel / CSV', value: 'csv_export' },
+          { label: 'Yes, generate downloadable PDF summaries', value: 'pdf_export' },
+          { label: 'No, viewing inside the app is sufficient', value: 'in_app_only' },
         ],
       },
     ],
@@ -338,7 +427,6 @@ export const QUESTION_FLOWS = {
 export function detectCategory(idea = '') {
   const text = idea.toLowerCase();
 
-  // Education keywords
   if (
     text.includes('college') ||
     text.includes('student') ||
@@ -355,7 +443,6 @@ export function detectCategory(idea = '') {
     return 'education';
   }
 
-  // E-commerce keywords
   if (
     text.includes('store') ||
     text.includes('shop') ||
@@ -374,7 +461,6 @@ export function detectCategory(idea = '') {
     return 'ecommerce';
   }
 
-  // Task Management keywords
   if (
     text.includes('task') ||
     text.includes('todo') ||
@@ -390,7 +476,6 @@ export function detectCategory(idea = '') {
     return 'task_management';
   }
 
-  // Social platform keywords
   if (
     text.includes('social') ||
     text.includes('feed') ||
@@ -404,7 +489,6 @@ export function detectCategory(idea = '') {
     return 'social';
   }
 
-  // Healthcare keywords
   if (
     text.includes('health') ||
     text.includes('clinic') ||

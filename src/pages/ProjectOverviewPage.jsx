@@ -1,20 +1,9 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  Lightbulb,
-  FileText,
-  Boxes,
-  Code2,
-  CheckCircle2,
-  ShieldCheck,
-  Cloud,
   ArrowRight,
-  Sparkles,
-  Layers,
-  Check,
   ExternalLink,
   ChevronRight,
-  Bot,
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext.jsx';
 import WorkflowStepper from '../components/common/WorkflowStepper.jsx';
@@ -47,18 +36,24 @@ export default function ProjectOverviewPage() {
   const lifecycleStages = [
     {
       key: 'IDEA',
+      num: '01',
       title: 'Idea Formulation',
-      description: 'Initial natural language problem description and scope boundary definition.',
-      icon: Lightbulb,
+      deliverable: 'Natural language problem description & scope definition',
       path: `/project/${project.id}`,
       status: 'Completed',
-      actionLabel: 'View Concept',
+      dotClass: 'completed',
+      actionLabel: 'View Prompt',
+      isCurrent: false,
     },
     {
       key: 'REQUIREMENTS',
-      title: 'Requirements Discovery & Review',
-      description: 'Context-aware feature extraction, user story modeling, and scope approval.',
-      icon: FileText,
+      num: '02',
+      title: 'Requirements Discovery',
+      deliverable: project.requirementsApproved
+        ? 'PRD specification, user stories & operational rules approved'
+        : project.discoveryCompleted
+        ? 'Discovery interview finished, PRD awaiting review'
+        : 'Domain discovery questionnaire in progress',
       path: project.discoveryCompleted
         ? `/project/${project.id}/requirements`
         : `/project/${project.id}/requirements/discovery`,
@@ -67,72 +62,128 @@ export default function ProjectOverviewPage() {
         : project.discoveryCompleted
         ? 'In Review'
         : 'In Progress',
+      dotClass: project.requirementsApproved ? 'completed' : 'active',
       actionLabel: project.requirementsApproved
         ? 'View Specs'
         : project.discoveryCompleted
         ? 'Review Requirements'
         : 'Resume Discovery',
+      isCurrent: !project.requirementsApproved,
     },
     {
       key: 'ARCHITECTURE',
+      num: '03',
       title: 'Architecture Blueprint',
-      description: 'Micro-service topology, relational database schema, and OpenAPI specification.',
-      icon: Boxes,
+      deliverable: project.architectureApproved
+        ? 'Technology stack, relational schema & OpenAPI routes approved'
+        : project.requirementsApproved
+        ? 'Technical architecture generated, awaiting approval'
+        : 'Awaiting requirements approval',
       path: `/project/${project.id}/architecture`,
       status: project.architectureApproved
         ? 'Completed'
         : project.requirementsApproved
         ? 'Pending Review'
         : 'Pending',
+      dotClass: project.architectureApproved
+        ? 'completed'
+        : project.requirementsApproved
+        ? 'active'
+        : 'pending',
       actionLabel: project.architectureApproved ? 'View Blueprint' : 'Review Architecture',
+      isCurrent: project.requirementsApproved && !project.architectureApproved,
     },
     {
       key: 'DEVELOPMENT',
+      num: '04',
       title: 'Development Workspace',
-      description: 'Autonomous component synthesis, state stores, and modular code generation.',
-      icon: Code2,
+      deliverable: project.developmentCompleted
+        ? '6 multi-file source modules & state stores synthesized'
+        : project.architectureApproved
+        ? 'Source synthesis active in virtual workspace'
+        : 'Awaiting architecture approval',
       path: `/project/${project.id}/development`,
       status: project.developmentCompleted
         ? 'Completed'
         : project.architectureApproved
         ? 'In Progress'
         : 'Pending',
-      actionLabel: project.developmentCompleted ? 'View Code' : 'Open Workspace',
+      dotClass: project.developmentCompleted
+        ? 'completed'
+        : project.architectureApproved
+        ? 'active'
+        : 'pending',
+      actionLabel: project.developmentCompleted ? 'Open Code Workspace' : 'Open Workspace',
+      isCurrent: project.architectureApproved && !project.developmentCompleted,
     },
     {
       key: 'TESTING',
-      title: 'Testing & Quality Assurance',
-      description: 'Automated unit, integration, and load test suites with AI issue diagnosis.',
-      icon: CheckCircle2,
+      num: '05',
+      title: 'Testing & Verification',
+      deliverable: project.testsPassed
+        ? '48 automated test suites passing across auth, data & edge'
+        : project.developmentCompleted
+        ? 'Test suites prepared, awaiting test execution run'
+        : 'Awaiting code synthesis',
       path: `/project/${project.id}/testing`,
       status: project.testsPassed
         ? 'Completed'
         : project.developmentCompleted
         ? 'Ready to Run'
         : 'Pending',
+      dotClass: project.testsPassed
+        ? 'completed'
+        : project.developmentCompleted
+        ? 'active'
+        : 'pending',
       actionLabel: project.testsPassed ? 'View Test Report' : 'Run Tests',
+      isCurrent: project.developmentCompleted && !project.testsPassed,
     },
     {
       key: 'SECURITY',
+      num: '06',
       title: 'Security & Vulnerability Audit',
-      description: 'Static AST scanning, dependency CVE analysis, and automated remediation.',
-      icon: ShieldCheck,
+      deliverable: project.securityResolved
+        ? '0 High/Medium CVE vulnerabilities, OWASP headers verified'
+        : project.testsPassed
+        ? 'Security audit required before production deployment'
+        : 'Awaiting testing completion',
       path: `/project/${project.id}/security`,
       status: project.securityResolved
         ? 'Completed'
         : project.testsPassed
         ? 'Audit Required'
         : 'Pending',
+      dotClass: project.securityResolved
+        ? 'completed'
+        : project.testsPassed
+        ? 'active'
+        : 'pending',
       actionLabel: project.securityResolved ? 'View Security Score' : 'Run Audit',
+      isCurrent: project.testsPassed && !project.securityResolved,
     },
     {
       key: 'DEPLOYMENT',
-      title: 'Deployment & Live Infrastructure',
-      description: 'Edge-container deployment, TLS cert provisioning, and live monitoring.',
-      icon: Cloud,
+      num: '07',
+      title: 'Deployment & Live Hosting',
+      deliverable: project.deployed
+        ? 'Live on Edge CDN with automated TLS 1.3 certificate'
+        : project.securityResolved
+        ? 'Build verified and ready for edge container deployment'
+        : 'Awaiting security clearance',
       path: `/project/${project.id}/deployment`,
-      status: project.deployed ? 'Live' : project.securityResolved ? 'Ready to Deploy' : 'Pending',
+      status: project.deployed
+        ? 'Live'
+        : project.securityResolved
+        ? 'Ready to Deploy'
+        : 'Pending',
+      dotClass: project.deployed
+        ? 'completed'
+        : project.securityResolved
+        ? 'active'
+        : 'pending',
       actionLabel: project.deployed ? 'View Live URL' : 'Deploy Application',
+      isCurrent: project.securityResolved && !project.deployed,
     },
   ];
 
@@ -143,18 +194,13 @@ export default function ProjectOverviewPage() {
       {/* Project Overview Header */}
       <div className="page-header-row">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
             <h1 className="page-header-title">{project.name}</h1>
-            <span
-              className={`status-pill ${
-                project.status === 'Live'
-                  ? 'success'
-                  : project.status === 'In Progress'
-                  ? 'active'
-                  : 'neutral'
-              }`}
-            >
-              {project.status}
+            <span className="status-indicator">
+              <span className={`status-dot ${project.status === 'Live' ? 'active' : 'completed'}`} />
+              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                {project.status}
+              </span>
             </span>
             <span className="badge-pill" style={{ textTransform: 'capitalize' }}>
               {project.category.replace('_', ' ')}
@@ -163,292 +209,172 @@ export default function ProjectOverviewPage() {
           <p className="page-header-subtitle">{project.description}</p>
         </div>
 
-        {project.deployed && project.liveUrl && (
-          <a
-            href={project.liveUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary btn-sm"
-          >
-            <span>Open Live App</span>
-            <ExternalLink size={14} />
-          </a>
-        )}
-      </div>
-
-      {/* Next Recommended Action Banner */}
-      <div
-        className="panel-card"
-        style={{
-          background:
-            'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%)',
-          borderColor: 'rgba(99, 102, 241, 0.3)',
-          marginBottom: 28,
-          padding: '24px 28px',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 16,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: 'var(--accent-primary)',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {project.deployed && project.liveUrl && (
+            <a
+              href={project.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary btn-sm"
             >
-              <Sparkles size={22} />
-            </div>
-            <div>
-              <div
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  color: 'var(--accent-primary)',
-                  letterSpacing: '0.04em',
-                }}
-              >
-                Recommended Next Step
-              </div>
-              <h3
-                style={{
-                  fontSize: '1.0625rem',
-                  fontWeight: 700,
-                  color: 'var(--text-primary)',
-                  marginTop: 2,
-                }}
-              >
-                {project.nextAction}
-              </h3>
-            </div>
-          </div>
+              <span>Open Live URL</span>
+              <ExternalLink size={13} />
+            </a>
+          )}
 
           <button
             type="button"
-            className="btn btn-primary"
+            className="btn btn-primary btn-sm"
             onClick={() => navigate(project.nextRoute || `/project/${project.id}/requirements`)}
           >
-            <span>Continue Stage</span>
-            <ArrowRight size={16} />
+            <span>Resume: {project.nextAction}</span>
+            <ArrowRight size={13} />
           </button>
         </div>
       </div>
 
-      {/* 2-Column Section: Lifecycle Grid & Meta Sidebar */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1.8fr 1fr',
-          gap: 28,
-          alignItems: 'flex-start',
-        }}
-      >
-        {/* Left: 7 Lifecycle Stages */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Main 2-Column Product Layout */}
+      <div className="project-overview-grid">
+        {/* Left Column: Lifecycle Progression Table */}
+        <div>
           <div
             style={{
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: 4,
+              justifyContent: 'space-between',
+              marginBottom: 12,
             }}
           >
-            <h2 style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Software Development Lifecycle (7 Stages)
+            <h2 style={{ fontSize: '0.875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-secondary)' }}>
+              Software Development Lifecycle
             </h2>
-            <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              Progress: {project.progress}%
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Progress: <strong style={{ color: 'var(--text-primary)' }}>{project.progress}%</strong>
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {lifecycleStages.map((stage, idx) => {
-              const Icon = stage.icon;
-              const isCompleted =
-                stage.status === 'Completed' || stage.status === 'Live';
-              const isInProgress =
-                stage.status === 'In Progress' ||
-                stage.status === 'In Review' ||
-                stage.status === 'Ready to Run' ||
-                stage.status === 'Pending Review' ||
-                stage.status === 'Audit Required' ||
-                stage.status === 'Ready to Deploy';
-
-              return (
-                <div
-                  key={stage.key}
-                  className="card-clean"
-                  style={{
-                    padding: '18px 20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 16,
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1 }}>
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 'var(--radius-md)',
-                        backgroundColor: isCompleted
-                          ? 'var(--success-subtle)'
-                          : isInProgress
-                          ? 'var(--accent-subtle)'
-                          : 'var(--bg-secondary)',
-                        color: isCompleted
-                          ? 'var(--success)'
-                          : isInProgress
-                          ? 'var(--accent-primary)'
-                          : 'var(--text-muted)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {isCompleted ? <Check size={18} /> : <Icon size={18} />}
-                    </div>
-
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 10,
-                          marginBottom: 2,
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontWeight: 700,
-                            fontSize: '0.9375rem',
-                            color: 'var(--text-primary)',
-                          }}
-                        >
-                          {idx + 1}. {stage.title}
-                        </span>
-                        <span
-                          className={`status-pill ${
-                            isCompleted ? 'success' : isInProgress ? 'active' : 'neutral'
-                          }`}
-                          style={{ fontSize: '0.6875rem' }}
-                        >
+          <div className="data-table-container">
+            <table className="clean-table">
+              <thead>
+                <tr>
+                  <th style={{ width: '45px' }}>#</th>
+                  <th style={{ width: '210px' }}>Stage</th>
+                  <th>Deliverable / Artifact</th>
+                  <th style={{ width: '120px' }}>Status</th>
+                  <th style={{ width: '130px', textAlign: 'right' }}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lifecycleStages.map((stage) => (
+                  <tr
+                    key={stage.key}
+                    style={{
+                      backgroundColor: stage.isCurrent ? 'var(--accent-subtle)' : 'transparent',
+                    }}
+                  >
+                    <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                      {stage.num}
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {stage.title}
+                      </div>
+                    </td>
+                    <td>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
+                        {stage.deliverable}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="status-indicator">
+                        <span className={`status-dot ${stage.dotClass}`} />
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                           {stage.status}
                         </span>
-                      </div>
-                      <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                        {stage.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  <Link
-                    to={stage.path}
-                    className={`btn ${isInProgress ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-                    style={{ whiteSpace: 'nowrap' }}
-                  >
-                    <span>{stage.actionLabel}</span>
-                    <ChevronRight size={14} />
-                  </Link>
-                </div>
-              );
-            })}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <Link
+                        to={stage.path}
+                        className={`btn ${stage.isCurrent ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                        style={{
+                          padding: '4px 10px',
+                          fontSize: '0.75rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                        }}
+                      >
+                        <span>{stage.actionLabel}</span>
+                        <ChevronRight size={12} />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Right Sidebar: Project Meta & Agent Team */}
+        {/* Right Column: Project Context & Pipeline Environment */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Specifications Card */}
-          <div className="panel-card" style={{ margin: 0, padding: '22px 20px' }}>
-            <h3
-              style={{
-                fontSize: '0.875rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                color: 'var(--text-muted)',
-                marginBottom: 16,
-                letterSpacing: '0.04em',
-              }}
-            >
-              Project Specifications
-            </h3>
+          <div className="panel-card" style={{ margin: 0, padding: '20px' }}>
+            <div className="panel-header" style={{ marginBottom: 14 }}>
+              <h3 className="panel-title" style={{ fontSize: '0.8125rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Project Specifications
+              </h3>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Metadata</span>
+            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    color: 'var(--text-muted)',
-                    display: 'block',
-                    marginBottom: 2,
-                  }}
-                >
-                  Original Prompt
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
+                  Initial Prompt
                 </span>
-                <p
+                <div
                   style={{
                     fontSize: '0.8125rem',
-                    color: 'var(--text-secondary)',
+                    color: 'var(--text-primary)',
                     backgroundColor: 'var(--bg-secondary)',
                     padding: '10px 12px',
-                    borderRadius: 'var(--radius-md)',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-color)',
                     lineHeight: 1.5,
                   }}
                 >
                   &ldquo;{project.idea}&rdquo;
-                </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: 2 }}>
+                    Domain
+                  </span>
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--text-primary)' }}>
+                    {project.category.replace('_', ' ')}
+                  </span>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: 2 }}>
+                    Target Stack
+                  </span>
+                  <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    React + Vite + SQL
+                  </span>
+                </div>
               </div>
 
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
-                  Domain Category
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
+                  Overall Lifecycle Completion
                 </span>
-                <span
-                  style={{
-                    fontWeight: 600,
-                    fontSize: '0.875rem',
-                    color: 'var(--text-primary)',
-                    textTransform: 'capitalize',
-                  }}
-                >
-                  {project.category.replace('_', ' ')}
-                </span>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
-                  Lifecycle Stage
-                </span>
-                <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--accent-primary)' }}>
-                  {project.stage.replace('_', ' ')}
-                </span>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
-                  Overall Progress
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div
                     style={{
                       flex: 1,
-                      height: 6,
+                      height: 5,
                       backgroundColor: 'var(--border-color)',
                       borderRadius: 3,
                       overflow: 'hidden',
@@ -459,58 +385,43 @@ export default function ProjectOverviewPage() {
                         width: `${project.progress}%`,
                         height: '100%',
                         backgroundColor: 'var(--accent-primary)',
+                        transition: 'width 0.3s ease',
                       }}
                     />
                   </div>
-                  <span
-                    style={{
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
-                      color: 'var(--text-primary)',
-                    }}
-                  >
+                  <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--text-primary)' }}>
                     {project.progress}%
                   </span>
                 </div>
               </div>
 
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
-                  Last Updated
-                </span>
-                <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                  {project.lastUpdated}
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', paddingTop: 8, borderTop: '1px solid var(--border-color)' }}>
+                <span>Last Updated</span>
+                <span style={{ color: 'var(--text-secondary)' }}>{project.lastUpdated}</span>
               </div>
             </div>
           </div>
 
-          {/* Assigned Agents Team */}
-          <div className="panel-card" style={{ margin: 0, padding: '22px 20px' }}>
-            <h3
-              style={{
-                fontSize: '0.875rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                color: 'var(--text-muted)',
-                marginBottom: 16,
-                letterSpacing: '0.04em',
-              }}
-            >
-              Assigned AI Agents
-            </h3>
+          {/* Autonomous Pipeline Roles */}
+          <div className="panel-card" style={{ margin: 0, padding: '20px' }}>
+            <div className="panel-header" style={{ marginBottom: 14 }}>
+              <h3 className="panel-title" style={{ fontSize: '0.8125rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Pipeline Automation
+              </h3>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>6 Workflows</span>
+            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
-                { name: 'Requirement Agent', role: 'Discovery & User Stories', active: true },
-                { name: 'Architecture Agent', role: 'System & DB Schemas', active: true },
-                { name: 'Development Agent', role: 'Component Synthesis', active: project.progress >= 50 },
-                { name: 'Testing Agent', role: 'Automated QA & Diagnosis', active: project.progress >= 70 },
-                { name: 'Security Agent', role: 'Vulnerability Analysis', active: project.progress >= 80 },
-                { name: 'DevOps Agent', role: 'Edge Deployment Pipeline', active: project.progress >= 90 },
-              ].map((agent) => (
+                { name: 'Requirement Discovery', scope: 'Context Q&A & PRD Generation', state: 'active' },
+                { name: 'Architecture Synthesis', scope: 'Relational Schemas & OpenAPI', state: project.requirementsApproved ? 'active' : 'pending' },
+                { name: 'Development Synthesizer', scope: 'Multi-file Code Generation', state: project.architectureApproved ? 'active' : 'pending' },
+                { name: 'Automated QA Runner', scope: '48 Unit, Integration & Load Suites', state: project.developmentCompleted ? 'active' : 'pending' },
+                { name: 'Security AST Scanner', scope: 'CVE Analysis & OWASP Hardening', state: project.testsPassed ? 'active' : 'pending' },
+                { name: 'Edge DevOps Pipeline', scope: 'Container Release & TLS Routing', state: project.securityResolved ? 'active' : 'pending' },
+              ].map((pipe) => (
                 <div
-                  key={agent.name}
+                  key={pipe.name}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -518,30 +429,18 @@ export default function ProjectOverviewPage() {
                     padding: '8px 10px',
                     borderRadius: 'var(--radius-sm)',
                     backgroundColor: 'var(--bg-secondary)',
+                    fontSize: '0.8125rem',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Bot size={15} className={agent.active ? 'text-accent' : 'text-muted'} />
-                    <div>
-                      <div
-                        style={{
-                          fontSize: '0.8125rem',
-                          fontWeight: 600,
-                          color: agent.active ? 'var(--text-primary)' : 'var(--text-muted)',
-                        }}
-                      >
-                        {agent.name}
-                      </div>
-                      <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
-                        {agent.role}
-                      </div>
-                    </div>
+                  <div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{pipe.name}</div>
+                    <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{pipe.scope}</div>
                   </div>
-                  <span
-                    className={`status-pill ${agent.active ? 'active' : 'neutral'}`}
-                    style={{ fontSize: '0.625rem', padding: '1px 6px' }}
-                  >
-                    {agent.active ? 'Assigned' : 'Queued'}
+                  <span className="status-indicator">
+                    <span className={`status-dot ${pipe.state}`} />
+                    <span style={{ fontSize: '0.6875rem', textTransform: 'capitalize', color: 'var(--text-muted)' }}>
+                      {pipe.state}
+                    </span>
                   </span>
                 </div>
               ))}

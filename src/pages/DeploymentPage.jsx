@@ -1,23 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  Cloud,
-  CheckCircle2,
-  ExternalLink,
-  Copy,
   Check,
-  RefreshCw,
-  Rocket,
   Globe,
-  Server,
-  Zap,
-  ShieldCheck,
-  Activity,
-  Layers,
+  ExternalLink,
+  Download,
+  Copy,
+  RefreshCw,
+  Eye,
+  ChevronDown,
+  ChevronRight,
+  Plus,
   ArrowRight,
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext.jsx';
 import { MOCK_DEPLOYMENT_CONFIG } from '../data/mockDeployment.js';
+import { MOCK_DEVELOPMENT } from '../data/mockDevelopment.js';
+import { downloadProjectZip } from '../utils/zipExport.js';
 import WorkflowStepper from '../components/common/WorkflowStepper.jsx';
 
 export default function DeploymentPage() {
@@ -27,387 +26,584 @@ export default function DeploymentPage() {
 
   const project = getProject(id);
   const [isDeploying, setIsDeploying] = useState(false);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [stepIndex, setStepIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
-  const liveUrl = project?.liveUrl || `https://${project?.id || 'demo'}.autodev.app`;
+  // Live simulated preview tasks
+  const [tasks, setTasks] = useState([
+    { id: '1', title: 'Complete student roll-call verification', status: 'done' },
+    { id: '2', title: 'Verify QR session code rotation', status: 'in-progress' },
+    { id: '3', title: 'Send low attendance warnings', status: 'todo' },
+  ]);
+  const [newTitle, setNewTitle] = useState('');
+
+  const liveUrl = project?.liveUrl || `https://${project?.id || 'app'}.autodev.app`;
 
   if (!project) {
     return (
-      <div className="workspace-page" style={{ textAlign: 'center', padding: '80px 20px' }}>
-        <h2>Project not found</h2>
-        <Link to="/projects" className="btn btn-primary btn-sm" style={{ marginTop: 16 }}>
+      <div className="workspace-page" style={{ textAlign: 'center', padding: '60px 20px' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '8px' }}>Project not found</h2>
+        <Link to="/projects" className="btn btn-primary btn-sm">
           Return to Projects
         </Link>
       </div>
     );
   }
 
-  const handleStartDeployment = () => {
+  const handleStartDeploy = () => {
     setIsDeploying(true);
-    setCurrentStepIndex(0);
+    setStepIndex(0);
 
-    const stepInterval = setInterval(() => {
-      setCurrentStepIndex((prev) => {
+    const interval = setInterval(() => {
+      setStepIndex((prev) => {
         if (prev < MOCK_DEPLOYMENT_CONFIG.steps.length - 1) {
           return prev + 1;
         } else {
-          clearInterval(stepInterval);
+          clearInterval(interval);
           setIsDeploying(false);
           completeDeployment(project.id, liveUrl);
           return prev;
         }
       });
-    }, 800);
+    }, 700);
   };
 
-  const handleCopyUrl = () => {
+  const handleDownloadZip = () => {
+    downloadProjectZip(project.name, MOCK_DEVELOPMENT.codeFiles);
+  };
+
+  const handleCopyLink = () => {
     navigator.clipboard.writeText(liveUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="workspace-page">
+    <div className="workspace-page" style={{ maxWidth: '960px' }}>
       <WorkflowStepper project={project} />
 
-      {/* Page Header */}
+      {/* Screen Header */}
       <div className="page-header-row">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <h1 className="page-header-title">Deployment &amp; Live Infrastructure</h1>
-            <span
-              className={`status-pill ${project.deployed ? 'success' : 'active'}`}
-              style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-            >
-              <Globe size={12} />
-              <span>{project.deployed ? 'Production Live' : 'Pre-flight Pipeline'}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <h1 className="page-header-title">
+              {project.deployed ? 'Live Application' : 'Release & Deployment'}: {project.name}
+            </h1>
+            <span className="status-indicator">
+              <span className={`status-dot ${project.deployed ? 'success' : 'in-progress'}`} />
+              <span style={{ fontSize: '0.75rem' }}>
+                {project.deployed ? 'Live on Edge' : 'Pre-flight Ready'}
+              </span>
             </span>
           </div>
           <p className="page-header-subtitle">
-            Autonomous zero-downtime edge container provisioning with TLS 1.3 certificates and DNS routing.
+            {project.deployed
+              ? 'Your application is live on the internet with zero-downtime edge hosting and SSL certificates.'
+              : 'Review your pre-flight checklist, test your application, download code, or deploy directly online.'}
           </p>
         </div>
 
         {project.deployed && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <a
               href={liveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-primary"
+              className="btn btn-primary btn-sm"
             >
               <span>Visit Live App</span>
-              <ExternalLink size={15} />
+              <ExternalLink size={13} />
             </a>
           </div>
         )}
       </div>
 
-      {/* Main Container: Live Success Screen OR Pre-flight Pipeline */}
       {project.deployed ? (
-        /* ================= LIVE APPLICATION SUCCESS SCREEN ================= */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-          {/* Hero Live Banner */}
+        /* ================= PAYOFF: LIVE APPLICATION SCREEN ================= */
+        <div className="workspace-doc">
+          {/* Hero Live URL Banner */}
           <div
-            className="panel-card"
             style={{
-              padding: '36px 32px',
-              background:
-                'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(99, 102, 241, 0.05) 100%)',
-              borderColor: 'rgba(16, 185, 129, 0.4)',
+              padding: '24px 28px',
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-sm)',
+              marginBottom: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '16px',
             }}
           >
+            <div>
+              <span
+                style={{
+                  fontSize: '0.6875rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: 'var(--success)',
+                }}
+              >
+                Production Live &bull; Release v1.0.0
+              </span>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
+                Your Application is Live
+              </div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                Online at <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-primary)' }}>{liveUrl}</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handleCopyLink}
+              >
+                {copied ? <Check size={13} style={{ color: 'var(--success)' }} /> : <Copy size={13} />}
+                <span>{copied ? 'Copied Link' : 'Copy Link'}</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handleDownloadZip}
+                title="Download full project as ZIP"
+              >
+                <Download size={13} />
+                <span>Download Project (.zip)</span>
+              </button>
+
+              <a
+                href={liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary btn-sm"
+              >
+                <span>Open in New Tab</span>
+                <ExternalLink size={13} />
+              </a>
+            </div>
+          </div>
+
+          {/* Performance & Security Health Row */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: '12px',
+              marginBottom: '24px',
+            }}
+          >
+            <div style={{ padding: '12px 16px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+                Response Latency
+              </span>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--success)', marginTop: '2px' }}>
+                24 ms
+              </div>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>Global Edge TTFB</span>
+            </div>
+
+            <div style={{ padding: '12px 16px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+                Uptime
+              </span>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--success)', marginTop: '2px' }}>
+                100%
+              </div>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>Zero-downtime release</span>
+            </div>
+
+            <div style={{ padding: '12px 16px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+                HTTPS Security
+              </span>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--accent-primary)', marginTop: '2px' }}>
+                TLS 1.3 Active
+              </div>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>Automated SSL certificate</span>
+            </div>
+
+            <div style={{ padding: '12px 16px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+                Hosting Region
+              </span>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
+                Worldwide CDN
+              </div>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>Replicated edge nodes</span>
+            </div>
+          </div>
+
+          {/* Interactive Live App Preview Frame */}
+          <div className="doc-section">
+            <div className="doc-section-title">
+              <span>Interactive Application Preview</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)' }}>
+                Live running instance
+              </span>
+            </div>
+
             <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: 20,
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-sm)',
+                overflow: 'hidden',
+                backgroundColor: '#090f1a',
+                color: '#f8fafc',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-                <div
-                  style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--success-subtle)',
-                    color: 'var(--success)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <Rocket size={28} />
-                </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      color: 'var(--success)',
-                      letterSpacing: '0.04em',
-                    }}
-                  >
-                    Deployment Successful &bull; Release v1.0.0-prod
-                  </div>
-                  <h2
-                    style={{
-                      fontSize: '1.5rem',
-                      fontWeight: 700,
-                      color: 'var(--text-primary)',
-                      marginTop: 2,
-                    }}
-                  >
-                    Your Application is Live on Edge
-                  </h2>
-                  <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: 4 }}>
-                    Automated DNS routing, HTTPS certificates, and CDN replication configured.
-                  </p>
-                </div>
-              </div>
-
-              {/* URL Pill Container */}
+              {/* Browser bar */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 10,
+                  gap: '8px',
                   padding: '8px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  backgroundColor: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)',
-                  boxShadow: 'var(--shadow-sm)',
+                  backgroundColor: '#070b14',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                  fontSize: '0.75rem',
+                  fontFamily: 'var(--font-mono)',
+                  color: '#94a3b8',
                 }}
               >
-                <Globe size={16} className="text-accent" />
-                <a
-                  href={liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    fontWeight: 600,
-                    fontSize: '0.9375rem',
-                    color: 'var(--text-primary)',
-                    fontFamily: 'var(--font-mono)',
-                    textDecoration: 'none',
-                  }}
-                >
-                  {liveUrl}
-                </a>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={handleCopyUrl}
-                  title="Copy live URL"
-                  style={{ padding: 4 }}
-                >
-                  {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
-                </button>
+                <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
+                <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#f59e0b' }} />
+                <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+                <span style={{ marginLeft: '6px' }}>{liveUrl}</span>
+              </div>
+
+              {/* Interactive content inside preview */}
+              <div style={{ padding: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>
+                      {project.name}
+                    </h3>
+                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                      Operational Workspace
+                    </span>
+                  </div>
+
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!newTitle.trim()) return;
+                      setTasks([...tasks, { id: Date.now().toString(), title: newTitle.trim(), status: 'todo' }]);
+                      setNewTitle('');
+                    }}
+                    style={{ display: 'flex', gap: '6px' }}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Add item..."
+                      value={newTitle}
+                      onChange={(e) => setNewTitle(e.target.value)}
+                      style={{
+                        padding: '5px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #334155',
+                        backgroundColor: '#1e293b',
+                        color: '#ffffff',
+                        fontSize: '0.75rem',
+                        outline: 'none',
+                      }}
+                    />
+                    <button type="submit" className="btn btn-primary btn-sm" style={{ padding: '4px 8px' }}>
+                      <Plus size={11} />
+                      <span>Add</span>
+                    </button>
+                  </form>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                  {['todo', 'in-progress', 'done'].map((col) => (
+                    <div
+                      key={col}
+                      style={{
+                        backgroundColor: 'rgba(30, 41, 59, 0.4)',
+                        border: '1px solid #1e293b',
+                        borderRadius: '4px',
+                        padding: '10px',
+                      }}
+                    >
+                      <span style={{ fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8', display: 'block', marginBottom: '8px' }}>
+                        {col.replace('-', ' ')}
+                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {tasks.filter((t) => t.status === col).map((task) => (
+                          <div
+                            key={task.id}
+                            style={{
+                              padding: '6px 8px',
+                              borderRadius: '3px',
+                              backgroundColor: '#1e293b',
+                              border: '1px solid #334155',
+                              fontSize: '0.6875rem',
+                              color: '#e2e8f0',
+                            }}
+                          >
+                            {task.title}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Real-time Health Metrics */}
-          <div className="metrics-row" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
-            <div className="metric-card">
-              <span className="metric-card-label">Global Edge Response</span>
-              <span className="metric-card-val" style={{ color: 'var(--success)' }}>
-                24 ms
-              </span>
-              <span className="metric-card-desc">Sub-second worldwide TTFB</span>
-            </div>
+          {/* Expandable Deployment History */}
+          <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => setShowDetails(!showDetails)}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 16px',
+                backgroundColor: 'var(--bg-secondary)',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+              }}
+            >
+              <span>Deployment Ledger &amp; History ({MOCK_DEPLOYMENT_CONFIG.history.length} Releases)</span>
+              {showDetails ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+            </button>
 
-            <div className="metric-card">
-              <span className="metric-card-label">System Uptime</span>
-              <span className="metric-card-val" style={{ color: 'var(--success)' }}>
-                100%
-              </span>
-              <span className="metric-card-desc">Zero-downtime continuous deploy</span>
-            </div>
-
-            <div className="metric-card">
-              <span className="metric-card-label">SSL / TLS Protocol</span>
-              <span className="metric-card-val" style={{ color: 'var(--accent-primary)' }}>
-                TLS 1.3
-              </span>
-              <span className="metric-card-desc">Automated Let&apos;s Encrypt certs</span>
-            </div>
-
-            <div className="metric-card">
-              <span className="metric-card-label">Edge Cache Hit Ratio</span>
-              <span className="metric-card-val">98.2%</span>
-              <span className="metric-card-desc">Static asset replication</span>
-            </div>
-          </div>
-
-          {/* Deployment History Log */}
-          <div className="panel-card">
-            <div className="panel-header">
-              <h3 className="panel-title">Deployment Audit Trail &amp; Releases</h3>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Immutable Ledger</span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {MOCK_DEPLOYMENT_CONFIG.history.map((h) => (
-                <div
-                  key={h.id}
-                  className="card-clean"
-                  style={{
-                    padding: '14px 18px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <Server size={16} className="text-accent" />
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>{h.version}</span>
-                        <span
-                          className={`status-pill ${h.status === 'Live' ? 'success' : 'neutral'}`}
-                          style={{ fontSize: '0.6875rem' }}
-                        >
-                          {h.status}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                        {h.commit} &bull; {h.author}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.8125rem', fontWeight: 600 }}>{h.deployedAt}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      Duration: {h.duration}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Actions Footer */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 12 }}>
-            <Link to="/dashboard" className="btn btn-secondary">
-              <span>Return to Dashboard</span>
-            </Link>
-            <Link to={`/project/${project.id}`} className="btn btn-primary">
-              <span>Project Lifecycle Hub</span>
-              <ArrowRight size={16} />
-            </Link>
+            {showDetails && (
+              <div style={{ padding: '14px', backgroundColor: 'var(--bg-card)' }}>
+                <table className="clean-table" style={{ fontSize: '0.75rem' }}>
+                  <thead>
+                    <tr>
+                      <th>Version</th>
+                      <th>Status</th>
+                      <th>Deployed At</th>
+                      <th>Commit</th>
+                      <th>Duration</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {MOCK_DEPLOYMENT_CONFIG.history.map((h) => (
+                      <tr key={h.id}>
+                        <td style={{ fontWeight: 600 }}>{h.version}</td>
+                        <td>
+                          <span className="status-indicator">
+                            <span className={`status-dot ${h.status === 'Live' ? 'success' : 'neutral'}`} />
+                            <span>{h.status}</span>
+                          </span>
+                        </td>
+                        <td>{h.deployedAt}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }}>{h.commit}</td>
+                        <td>{h.duration}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       ) : (
-        /* ================= PRE-FLIGHT CHECKLIST & DEPLOY BUTTON ================= */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          {/* Pre-flight Checklist */}
-          <div className="panel-card">
-            <div className="panel-header">
-              <h3 className="panel-title">Pre-Flight Release Validation</h3>
-              <span className="status-pill success" style={{ fontSize: '0.6875rem' }}>
-                All 5 Gates Passed
+        /* ================= PRE-FLIGHT CHECKLIST & DEPLOY ACTION ================= */
+        <div className="workspace-doc">
+          {/* Pre-Flight Checklist */}
+          <div className="doc-section">
+            <div className="doc-section-title">
+              <span>Pre-Flight Readiness Checklist</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600 }}>
+                All 5 checks passed
               </span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {MOCK_DEPLOYMENT_CONFIG.checklist.map((chk) => (
-                <div
-                  key={chk.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '12px 14px',
-                    borderRadius: 'var(--radius-md)',
-                    backgroundColor: 'var(--bg-secondary)',
-                  }}
-                >
-                  <CheckCircle2 size={18} className="text-success" style={{ flexShrink: 0 }} />
-                  <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-primary)' }}>
-                    {chk.title}
-                  </span>
+            <div
+              style={{
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: 'var(--bg-secondary)',
+                padding: '14px 18px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+              }}
+            >
+              {MOCK_DEPLOYMENT_CONFIG.checklist.map((item) => (
+                <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8125rem' }}>
+                  <Check size={14} style={{ color: 'var(--success)', flexShrink: 0 }} />
+                  <span style={{ color: 'var(--text-primary)' }}>{item.title}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Deployment Action & Simulation Progress */}
+          {/* Action Center: Preview, Download ZIP, Deploy */}
           <div
-            className="panel-card"
             style={{
-              padding: '32px 28px',
-              textAlign: 'center',
-              backgroundColor: 'var(--bg-secondary)',
-              borderColor: isDeploying ? 'var(--accent-primary)' : 'var(--border-color)',
+              padding: '24px 28px',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-sm)',
+              backgroundColor: 'var(--bg-card)',
+              marginBottom: '20px',
             }}
           >
-            {!isDeploying ? (
-              <div>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 8 }}>
-                  Ready to Deploy to Global Edge
-                </h2>
-                <p
-                  style={{
-                    fontSize: '0.875rem',
-                    color: 'var(--text-secondary)',
-                    maxWidth: 480,
-                    margin: '0 auto 24px auto',
-                  }}
-                >
-                  Initiates edge container compilation, database schema migration, and DNS domain routing to{' '}
-                  <code style={{ color: 'var(--accent-primary)' }}>{liveUrl}</code>.
-                </p>
+            <div style={{ marginBottom: '16px' }}>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                Application Ready for Deployment
+              </h2>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                You can preview the app, download the entire source code as a ZIP archive, or deploy directly to the Edge cloud.
+              </p>
+            </div>
 
-                <button
-                  type="button"
-                  className="btn btn-primary btn-lg"
-                  onClick={handleStartDeployment}
-                >
-                  <Rocket size={18} />
-                  <span>Trigger Production Deployment</span>
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-                <RefreshCw size={36} className="animate-spin text-accent" />
-                <div>
-                  <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {MOCK_DEPLOYMENT_CONFIG.steps[currentStepIndex].label}
-                  </h3>
-                  <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-                    Step {currentStepIndex + 1} of {MOCK_DEPLOYMENT_CONFIG.steps.length} &bull;{' '}
-                    {MOCK_DEPLOYMENT_CONFIG.steps[currentStepIndex].progress}% completed
-                  </span>
+            {isDeploying ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '16px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8125rem', fontWeight: 600 }}>
+                  <RefreshCw size={14} className="animate-spin" style={{ color: 'var(--accent-primary)' }} />
+                  <span>{MOCK_DEPLOYMENT_CONFIG.steps[stepIndex].label}...</span>
                 </div>
-
                 <div
                   style={{
+                    height: '4px',
                     width: '100%',
-                    maxWidth: 480,
-                    height: 8,
-                    backgroundColor: 'var(--border-color)',
-                    borderRadius: 4,
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderRadius: '2px',
                     overflow: 'hidden',
                   }}
                 >
                   <div
                     style={{
                       height: '100%',
-                      width: `${MOCK_DEPLOYMENT_CONFIG.steps[currentStepIndex].progress}%`,
+                      width: `${MOCK_DEPLOYMENT_CONFIG.steps[stepIndex].progress}%`,
                       backgroundColor: 'var(--accent-primary)',
-                      transition: 'width 300ms ease',
+                      transition: 'width 250ms ease',
                     }}
                   />
                 </div>
               </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleStartDeploy}
+                >
+                  <Globe size={14} />
+                  <span>Deploy Application Online</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleDownloadZip}
+                  title="Download full project as ZIP"
+                >
+                  <Download size={14} />
+                  <span>Download Project (.zip)</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => setShowPreviewModal(true)}
+                >
+                  <Eye size={13} />
+                  <span>Preview First</span>
+                </button>
+              </div>
             )}
+          </div>
+
+          {/* Expandable Technical Details */}
+          <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => setShowDetails(!showDetails)}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 16px',
+                backgroundColor: 'var(--bg-secondary)',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+              }}
+            >
+              <span>Deployment Infrastructure Details</span>
+              {showDetails ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+            </button>
+
+            {showDetails && (
+              <div style={{ padding: '16px', backgroundColor: 'var(--bg-card)', fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                <p style={{ margin: '0 0 8px 0' }}>
+                  <strong>Cloud Platform:</strong> Global Serverless Edge Containers with US-East and EU-West regions.
+                </p>
+                <p style={{ margin: '0 0 8px 0' }}>
+                  <strong>TLS Protocol:</strong> Automated Let&apos;s Encrypt TLS 1.3 with automated certificate renewal.
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong>DNS Routing:</strong> Anycast routing to the nearest edge datacenter for sub-30ms response times.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal for Pre-Deploy state */}
+      {showPreviewModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 200,
+            padding: '20px',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '800px',
+              width: '100%',
+              backgroundColor: '#0b111c',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-sm)',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #1e293b' }}>
+              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#f8fafc' }}>App Preview: {project.name}</span>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShowPreviewModal(false)} style={{ padding: '2px 6px', color: '#94a3b8' }}>
+                Close
+              </button>
+            </div>
+            <div style={{ padding: '24px', color: '#f8fafc' }}>
+              <p style={{ fontSize: '0.8125rem', color: '#94a3b8', marginBottom: '16px' }}>
+                Previewing pre-flight synthesized build. All 48 tests passing and security verified.
+              </p>
+              <div style={{ padding: '14px', border: '1px solid #334155', borderRadius: '4px', backgroundColor: '#1e293b' }}>
+                <h4 style={{ margin: '0 0 6px 0', fontSize: '0.9375rem' }}>{project.name}</h4>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>{project.description}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}

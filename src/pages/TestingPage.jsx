@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  CheckCircle2,
-  AlertTriangle,
-  ArrowRight,
-  Sparkles,
-  RefreshCw,
-  Clock,
+  Check,
+  X,
   ChevronDown,
   ChevronRight,
-  ShieldCheck,
-  Check,
-  XCircle,
-  FileCheck2,
+  ArrowRight,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext.jsx';
 import { INITIAL_TEST_SUITE, FIXED_TEST_SUITE } from '../data/mockTesting.js';
@@ -28,17 +24,17 @@ export default function TestingPage() {
     project?.testsPassed ? FIXED_TEST_SUITE : INITIAL_TEST_SUITE
   );
   const [filter, setFilter] = useState('all');
-  const [expandedId, setExpandedId] = useState('tc-4'); // Default expand a failed case to highlight progressive disclosure
+  const [expandedId, setExpandedId] = useState('tc-4'); // Default expand a failure for progressive disclosure
   const [isReRunning, setIsReRunning] = useState(false);
-  const [fixSuccessNotice, setFixSuccessNotice] = useState(
-    project?.testsPassed ? 'All 48 test suites verified and passing with 95.8% coverage.' : ''
+  const [notice, setNotice] = useState(
+    project?.testsPassed ? 'All 48 tests passing. Codebase verified for production release.' : ''
   );
 
   if (!project) {
     return (
-      <div className="workspace-page" style={{ textAlign: 'center', padding: '80px 20px' }}>
-        <h2>Project not found</h2>
-        <Link to="/projects" className="btn btn-primary btn-sm" style={{ marginTop: 16 }}>
+      <div className="workspace-page" style={{ textAlign: 'center', padding: '60px 20px' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '8px' }}>Project not found</h2>
+        <Link to="/projects" className="btn btn-primary btn-sm">
           Return to Projects
         </Link>
       </div>
@@ -50,11 +46,17 @@ export default function TestingPage() {
     setTimeout(() => {
       setTestData(FIXED_TEST_SUITE);
       setIsReRunning(false);
-      setFixSuccessNotice(
-        'QA Agent applied patch: Sliding window capacity increased to 250 req/m and CSV fallback guard injected. 48/48 tests now passing.'
-      );
+      setNotice('QA Agent patched rate limiters and null guards. 48/48 tests now passing (95.8% coverage).');
       passTests(project.id);
-    }, 1000);
+    }, 900);
+  };
+
+  const handleRerunTests = () => {
+    setIsReRunning(true);
+    setTimeout(() => {
+      setIsReRunning(false);
+      setNotice('Executed all 48 test suites: 100% assertions verified cleanly.');
+    }, 700);
   };
 
   const handleProceedToSecurity = () => {
@@ -62,261 +64,244 @@ export default function TestingPage() {
     navigate(`/project/${project.id}/security`);
   };
 
+  const isAllPassed = testData.metrics.failed === 0;
+
   const filteredCases = testData.testCases.filter((tc) => {
     if (filter === 'passed') return tc.status === 'Passed';
     if (filter === 'failed') return tc.status === 'Failed';
     return true;
   });
 
-  const isAllPassed = testData.metrics.failed === 0;
-
   return (
-    <div className="workspace-page">
+    <div className="workspace-page" style={{ maxWidth: '960px' }}>
       <WorkflowStepper project={project} />
 
-      {/* Page Header */}
+      {/* Screen Header */}
       <div className="page-header-row">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            <h1 className="page-header-title">Automated Testing &amp; QA</h1>
-            <span
-              className={`status-pill ${isAllPassed ? 'success' : 'warning'}`}
-              style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-            >
-              {isAllPassed ? <Check size={12} /> : <AlertTriangle size={12} />}
-              <span>{isAllPassed ? 'All Tests Passing' : 'Issues Identified'}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <h1 className="page-header-title">Automated Testing: {project.name}</h1>
+            <span className="status-indicator">
+              <span className={`status-dot ${isAllPassed ? 'success' : 'error'}`} />
+              <span style={{ fontSize: '0.75rem' }}>
+                {isAllPassed ? '48 Tests Passing' : `${testData.metrics.failed} Tests Need Resolution`}
+              </span>
             </span>
           </div>
           <p className="page-header-subtitle">
-            Continuous integration test runner verifying unit contracts, database rollbacks, and security boundaries.
+            Automated test suites validating user login, transactions, inputs, and edge scenarios.
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {!isAllPassed && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {!isAllPassed ? (
             <button
               type="button"
-              className="btn btn-secondary"
+              className="btn btn-secondary btn-sm"
               onClick={handleResolveAndRerun}
               disabled={isReRunning}
             >
               {isReRunning ? (
-                <RefreshCw size={15} className="animate-spin" />
+                <RefreshCw size={13} className="animate-spin" />
               ) : (
-                <Sparkles size={15} className="text-accent" />
+                <CheckCircle2 size={13} style={{ color: 'var(--success)' }} />
               )}
               <span>{isReRunning ? 'Re-running Tests...' : 'Fix Issues & Run Again'}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={handleRerunTests}
+              disabled={isReRunning}
+            >
+              <RefreshCw size={13} className={isReRunning ? 'animate-spin' : ''} />
+              <span>{isReRunning ? 'Running Tests...' : 'Run Tests Again'}</span>
             </button>
           )}
 
           <button
             type="button"
-            className="btn btn-primary"
+            className="btn btn-primary btn-sm"
             onClick={handleProceedToSecurity}
           >
-            <span>Proceed to Security Audit</span>
-            <ArrowRight size={16} />
+            <span>Proceed to Security Review</span>
+            <ArrowRight size={13} />
           </button>
         </div>
       </div>
 
-      {/* Status Notice Banner if fixed */}
-      {fixSuccessNotice && (
+      {notice && (
         <div
-          className="panel-card"
           style={{
-            padding: '14px 18px',
-            marginBottom: 24,
+            padding: '10px 14px',
+            borderRadius: 'var(--radius-sm)',
             backgroundColor: 'var(--success-subtle)',
-            borderColor: 'var(--success)',
             color: 'var(--success)',
+            fontSize: '0.8125rem',
+            marginBottom: '18px',
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
-            fontSize: '0.84rem',
+            gap: '8px',
           }}
         >
-          <CheckCircle2 size={18} style={{ flexShrink: 0 }} />
-          <span>{fixSuccessNotice}</span>
+          <Check size={15} />
+          <span>{notice}</span>
         </div>
       )}
 
-      {/* Metrics Row */}
-      <div className="metrics-row" style={{ gridTemplateColumns: 'repeat(5, 1fr)', marginBottom: 28 }}>
-        <div className="metric-card">
-          <span className="metric-card-label">Total Test Cases</span>
-          <span className="metric-card-val">{testData.metrics.total}</span>
-          <span className="metric-card-desc">Comprehensive test coverage</span>
-        </div>
-
-        <div className="metric-card">
-          <span className="metric-card-label">Passed Tests</span>
-          <span className="metric-card-val" style={{ color: 'var(--success)' }}>
-            {testData.metrics.passed}
-          </span>
-          <span className="metric-card-desc">Verified business contracts</span>
-        </div>
-
-        <div className="metric-card">
-          <span className="metric-card-label">Failed Tests</span>
-          <span
-            className="metric-card-val"
-            style={{ color: testData.metrics.failed > 0 ? 'var(--error)' : 'var(--text-muted)' }}
-          >
-            {testData.metrics.failed}
-          </span>
-          <span className="metric-card-desc">
-            {testData.metrics.failed > 0 ? 'Action required before release' : 'Zero failures'}
-          </span>
-        </div>
-
-        <div className="metric-card">
-          <span className="metric-card-label">Code Coverage</span>
-          <span className="metric-card-val" style={{ color: 'var(--accent-primary)' }}>
-            {testData.metrics.coverage}%
-          </span>
-          <span className="metric-card-desc">Branch &amp; statement coverage</span>
-        </div>
-
-        <div className="metric-card">
-          <span className="metric-card-label">Execution Duration</span>
-          <span className="metric-card-val">{testData.metrics.executionTimeMs} ms</span>
-          <span className="metric-card-desc">Parallel test execution</span>
-        </div>
-      </div>
-
-      {/* Filter Tabs & Test Cases List */}
-      <div className="panel-card">
+      {/* Test Results Document */}
+      <div className="workspace-doc">
+        {/* Concise Status Overview Bar (No giant metric cards!) */}
         <div
           style={{
             display: 'flex',
-            justifyContent: 'space-between',
             alignItems: 'center',
-            paddingBottom: 16,
-            borderBottom: '1px solid var(--border-color)',
-            marginBottom: 20,
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            padding: '12px 16px',
+            borderRadius: 'var(--radius-sm)',
+            backgroundColor: 'var(--bg-secondary)',
+            border: '1px solid var(--border-color)',
+            marginBottom: '18px',
+            fontSize: '0.8125rem',
           }}
         >
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span>
+              <strong>Total:</strong> {testData.metrics.total} tests
+            </span>
+            <span style={{ color: 'var(--success)' }}>
+              <strong>Passed:</strong> {testData.metrics.passed}
+            </span>
+            <span style={{ color: testData.metrics.failed > 0 ? 'var(--error)' : 'var(--text-muted)' }}>
+              <strong>Failed:</strong> {testData.metrics.failed}
+            </span>
+            <span>
+              <strong>Coverage:</strong> {testData.metrics.coverage}%
+            </span>
+          </div>
+
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            Execution Duration: {testData.metrics.executionTimeMs} ms
+          </div>
+        </div>
+
+        {/* Filter Tab Row */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', gap: '4px' }}>
             <button
               type="button"
-              className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setFilter('all')}
+              className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`}
+              style={{ fontSize: '0.75rem', padding: '4px 8px' }}
             >
-              All Tests ({testData.testCases.length})
+              All ({testData.testCases.length})
             </button>
             <button
               type="button"
-              className={`btn btn-sm ${filter === 'passed' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setFilter('passed')}
+              className={`btn btn-sm ${filter === 'passed' ? 'btn-primary' : 'btn-ghost'}`}
+              style={{ fontSize: '0.75rem', padding: '4px 8px' }}
             >
               Passed ({testData.metrics.passed})
             </button>
             <button
               type="button"
-              className={`btn btn-sm ${filter === 'failed' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setFilter('failed')}
+              className={`btn btn-sm ${filter === 'failed' ? 'btn-primary' : 'btn-ghost'}`}
+              style={{ fontSize: '0.75rem', padding: '4px 8px' }}
             >
               Failed ({testData.metrics.failed})
             </button>
           </div>
 
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Click any test case to expand execution diagnostics
+          <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
+            Click any test for diagnostic details
           </span>
         </div>
 
-        {/* Test Cases Table / List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* Clean Results List */}
+        <div className="results-list">
           {filteredCases.map((tc) => {
             const isFailed = tc.status === 'Failed';
             const isExpanded = expandedId === tc.id;
 
             return (
-              <div
-                key={tc.id}
-                className="card-clean"
-                style={{
-                  padding: '14px 18px',
-                  borderColor: isFailed ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-color)',
-                  backgroundColor: isFailed ? 'rgba(239, 68, 68, 0.02)' : 'var(--bg-card)',
-                }}
-              >
+              <div key={tc.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                  }}
+                  className="results-row"
                   onClick={() => setExpandedId(isExpanded ? null : tc.id)}
+                  style={{ backgroundColor: isFailed ? 'rgba(239, 68, 68, 0.03)' : 'transparent' }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    {isFailed ? (
-                      <XCircle size={18} style={{ color: 'var(--error)' }} />
-                    ) : (
-                      <CheckCircle2 size={18} className="text-success" />
-                    )}
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
-                        {tc.name}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                        {tc.suite} • Duration: {tc.duration}
-                      </div>
-                    </div>
+                  <div className="results-row-left">
+                    <span
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '3px',
+                        backgroundColor: isFailed ? 'var(--error-subtle)' : 'var(--success-subtle)',
+                        color: isFailed ? 'var(--error)' : 'var(--success)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.6875rem',
+                        fontWeight: 700,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {isFailed ? <X size={12} strokeWidth={3} /> : <Check size={12} strokeWidth={3} />}
+                    </span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.8125rem' }}>
+                      {tc.name}
+                    </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span
-                      className={`status-pill ${isFailed ? 'warning' : 'success'}`}
-                      style={{ fontSize: '0.6875rem' }}
-                    >
-                      {tc.status}
-                    </span>
-                    {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  <div className="results-row-right">
+                    <span>{tc.suite}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{tc.duration}</span>
+                    {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   </div>
                 </div>
 
-                {/* Expanded Details / AI Diagnosis */}
                 {isExpanded && (
                   <div
                     style={{
-                      marginTop: 14,
-                      paddingTop: 14,
-                      borderTop: '1px solid var(--border-color)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 10,
+                      padding: '12px 18px',
+                      backgroundColor: 'var(--bg-secondary)',
+                      fontSize: '0.75rem',
+                      lineHeight: '1.5',
+                      color: 'var(--text-secondary)',
                     }}
                   >
-                    <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                      <strong>Description:</strong> {tc.description}
-                    </p>
+                    <div style={{ marginBottom: '4px' }}>
+                      <strong>Purpose:</strong> {tc.description}
+                    </div>
 
                     {tc.failureDetails && (
                       <div
                         style={{
-                          padding: '12px 14px',
-                          borderRadius: 'var(--radius-md)',
-                          backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                          marginTop: '8px',
+                          padding: '8px 12px',
+                          borderRadius: 'var(--radius-sm)',
+                          backgroundColor: 'rgba(239, 68, 68, 0.06)',
                           border: '1px solid rgba(239, 68, 68, 0.2)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 6,
+                          color: 'var(--error)',
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <AlertTriangle size={15} style={{ color: 'var(--error)' }} />
-                          <span style={{ fontWeight: 700, fontSize: '0.8125rem', color: 'var(--error)' }}>
-                            Assertion Failure: {tc.failureDetails.error}
-                          </span>
+                        <div>
+                          <strong>Failure:</strong> {tc.failureDetails.error}
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                          <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>
-                            AI Testing Agent Recommendation:{' '}
-                          </span>
-                          {tc.failureDetails.aiRecommendation}
+                        <div style={{ marginTop: '4px', color: 'var(--text-primary)' }}>
+                          <strong>Recommendation:</strong> {tc.failureDetails.aiRecommendation}
                         </div>
                       </div>
                     )}
@@ -325,6 +310,50 @@ export default function TestingPage() {
               </div>
             );
           })}
+        </div>
+
+        {/* Bottom Approval Bar */}
+        <div className="action-bar-sticky">
+          <div>
+            <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+              {isAllPassed ? 'All Test Suites Passing' : 'Resolve Failures to Proceed'}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Next stage will inspect security boundaries and dependency vulnerabilities.
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {!isAllPassed ? (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleResolveAndRerun}
+                disabled={isReRunning}
+              >
+                <CheckCircle2 size={14} style={{ color: 'var(--success)' }} />
+                <span>Fix Issues &amp; Run Again</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleRerunTests}
+                disabled={isReRunning}
+              >
+                <RefreshCw size={14} className={isReRunning ? 'animate-spin' : ''} />
+                <span>{isReRunning ? 'Running Tests...' : 'Run Tests Again'}</span>
+              </button>
+            )}
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleProceedToSecurity}
+            >
+              <span>Proceed to Security Review</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
         </div>
       </div>
     </div>
